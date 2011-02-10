@@ -13,6 +13,7 @@ class SCODDevice:
 		self.dev_id			= ""
 		self.dev_modules	= {}
 		self.dev_name		= ""
+		self.dev_driver		= ""
 
 		if dev is not None:
 			self._check_device(dev)
@@ -54,6 +55,7 @@ class SCODDevice:
 		else:
 			return
 
+		self.dev_driver = dev.driver
 		self._check_mod(mod)
 		self._device_name(dev)
 		self.our_devices.clear()

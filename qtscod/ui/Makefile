@@ -1,0 +1,12 @@
+UI=MainWindow
+PYUIC=/usr/bin/pyuic4
+MAKEPY=$(PYUIC) -o
+
+all: clean $(UI).py
+	@echo "Done"
+
+clean:
+	rm -rf *.py
+
+$(UI).py:
+	$(MAKEPY) $@ ui/$(UI).ui

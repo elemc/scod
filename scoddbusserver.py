@@ -47,6 +47,12 @@ class SCODDBUSServer(dbus.service.Object):
 		pass
 		# this is method desabled device notification in the future
 
+	def currentDriver(self, dev_id):
+		res = self.get_param(dev_id, 'driver')
+		if res is None:
+			return ""
+		return res
+
 	@dbus.service.method(dbus_interface=global_service_name, in_signature='', out_signature='')
 	def listDevices(self):
 		for dev_id in self.devices.keys():
@@ -73,20 +79,15 @@ class SCODDBUSServer(dbus.service.Object):
 		dev['name']		= scoddev.dev_name
 		dev['modules']	= scoddev.dev_modules
 		dev['type']		= scoddev.dev_type
+		dev['driver']	= scoddev.dev_driver
 		self.devices[scoddev.dev_id] = dev
 
 		self.new_device(scoddev.dev_id, scoddev.dev_name, scoddev.dev_type)
-		#dev_id 		= scoddev.dev_id		# s
-		#dev_name	= scoddev.dev_name		# s
-		#dev_modules	= scoddev.dev_modules	# as
-		#dev_type	= scoddev.dev_type		# s
-		#self.new_device(dev_id, dev_name, dev_modules, dev_type)
 
 class DBUSThread(Thread):
 	def __init__(self):
 		Thread.__init__(self)
 		gobject.threads_init()
-		#threads_init()
 		DBusGMainLoop(set_as_default=True)
 		self.dbus_server	= SCODDBUSServer()
 

@@ -26,12 +26,12 @@ class SCODDaemon:
 		self.monitor = Monitor.from_netlink(self.context)
 		for action, device in self.monitor:
 			self._new_device(action, device)
-	
+
 	def _new_device(self, act, dev):
 		if act != 'add':
 			return
 	
-		time.sleep(1)
+		time.sleep(0.1)
 		if ('MODALIAS' not in dev.keys()): # and ( 'modalias' not in dev.attributes.keys()  ):
 			return
 
@@ -45,3 +45,5 @@ class SCODDaemon:
 			d = SCODDevice(dev)
 			if ( d.isOurDevice() ):
 				self.dbus.tell_about_new_device(d)
+	def stop(self):
+		self.dbus.stop()
