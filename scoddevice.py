@@ -88,6 +88,8 @@ class SCODDevice:
 				self.dev_name = 'NVIDIA video adapter'
 			elif vendor_id == '1002':
 				self.dev_name = 'ATI video adapter'
+
+			self.dev_type = 'video'
 		else:
 			self.dev_name = 'Unknown videoadapter'
 			self.dev_type = 'video'
