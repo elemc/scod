@@ -1,20 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from threading import Thread
+from PyQt4.QtCore import QThread,QEventLoop
 
 # dbus
-from dbus.mainloop.glib import DBusGMainLoop
+from dbus.mainloop.qt import DBusQtMainLoop
 import dbus
-import gobject
+#import gobject
 
-class ListenThread(Thread):
+class ListenThread(QThread):
 	def __init__(self, parent_class):
-		Thread.__init__(self)
-		gobject.threads_init()	
-		DBusGMainLoop(set_as_default=True)
+		QThread.__init__(self)
+		DBusQtMainLoop(set_as_default=True)
 
-		#self.window_class	= parent_class
 		self.mw				= parent_class
 		bus					= dbus.SessionBus()
 		try:
@@ -28,17 +26,17 @@ class ListenThread(Thread):
 			self.scod			= None
 			return
 		
-		#self.mw = parent_class
+		self.mw = parent_class
 
 	def run(self):
 		if (self.iface_signal is None) or (self.iface_cmd is None):
 			return
 		self.iface_signal.connect_to_signal('new_device', self.new_device_handler)
 		self.iface_cmd.listDevices()
-		gobject.MainLoop().run()
+		QEventLoop().exec_()
 	
 	def stop(self):
-		gobject.MainLoop().quit()
+		QEventLoop().exit()
 
 	def request_device(self, dev_id):
 		pass	
@@ -46,8 +44,5 @@ class ListenThread(Thread):
 	def new_device_handler(self, dev_id, dev_name, dev_type):
 		if self.mw is None:
 			return
-			#self.mw = self.window_class() 
 
-		self.mw.add_new_device() #FIXME
-		#if not self.mw.isShowned():
-		self.mw.show_notification()
+		self.mw()

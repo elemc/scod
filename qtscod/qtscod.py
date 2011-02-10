@@ -27,9 +27,6 @@ if __name__ == '__main__':
 
 	
 	w = MainWindow()
-	w.hide()
-	#t = ListenThread(w)
-	#t.start()
-	#w.show()
+	#w.hide()
 	w.start_listen()
 	sys.exit(app.exec_())

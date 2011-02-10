@@ -11,7 +11,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		QMainWindow.__init__(self, parent)
 		self.setupUi(self)
 		self._init_menu()
-		self.lt = ListenThread(self)
+		self.lt = ListenThread(self.add_new_device)
 		#self.lt.start()
 
 	def _init_menu(self):
@@ -22,7 +22,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self.hide()
 
 	def add_new_device(self): #FIXME: add object Device
-		pass
+		self.show_notification()
 
 
 	def show_notification(self):
