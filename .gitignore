@@ -1,1 +1,3 @@
 sup_files/*
+*.pyc
+.*.swp

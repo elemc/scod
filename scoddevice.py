@@ -10,13 +10,12 @@ class SCODDevice:
 		self._init_configs()
 
 		self.dev_type		= ""
-		self.dev_id		= ""
-		self.dev_modules	= []
+		self.dev_id			= ""
+		self.dev_modules	= {}
 		self.dev_name		= ""
 
 		if dev is not None:
 			self._check_device(dev)
-		#dev = None
 
 	def __del__(self):
 		self.our_devices.clear()
@@ -42,7 +41,7 @@ class SCODDevice:
 			aliases = m['aliases']
 			for al in aliases:
 				if self._mod_search(al, mod):
-					self.dev_modules.append(module)
+					self.dev_modules[module] = m['packages']
 
 	def _check_device(self, dev):
 		mod_name_key = 'MODALIAS'
