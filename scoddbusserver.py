@@ -47,6 +47,7 @@ class SCODDBUSServer(dbus.service.Object):
 		pass
 		# this is method desabled device notification in the future
 
+	@dbus.service.method(dbus_interface=global_service_name, in_signature='s', out_signature='s')
 	def currentDriver(self, dev_id):
 		res = self.get_param(dev_id, 'driver')
 		if res is None:

@@ -44,5 +44,18 @@ class ListenThread(QThread):
 	def new_device_handler(self, dev_id, dev_name, dev_type):
 		if self.mw is None:
 			return
+		device_dict = {}
+		m = {}
+		modules = self.iface_cmd.deviceModules(dev_id)
+		for mod in modules:
+			pkgs = self.iface_cmd.packagesForModule(dev_id, mod)
+			m[mod] = pkgs
+		cur_drv = self.iface_cmd.currentDriver(dev_id)
 
-		self.mw()
+		device_dict['id']				= dev_id
+		device_dict['name']				= dev_name
+		device_dict['type']				= dev_type
+		device_dict['modules']			= m
+		device_dict['current_driver']	= cur_drv
+
+		self.mw(device_dict)
