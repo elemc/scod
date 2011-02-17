@@ -25,6 +25,8 @@ class Device:
 		self._modules			= self._extract_data(dev, 'modules')
 		self._current_driver	= self._extract_data(dev, 'current_driver')
 
+	def current_driver(self):
+		return self._current_driver
 	def device_name(self):
 		return self._name
 	def device_type(self):

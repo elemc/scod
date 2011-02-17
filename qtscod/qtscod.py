@@ -2,7 +2,7 @@
 
 # Qt4
 from PyQt4 import QtCore
-from PyQt4.QtCore import QObject, QTranslator, QLibraryInfo, QLocale
+from PyQt4.QtCore import QObject, QTranslator, QLibraryInfo, QLocale, QString
 from PyQt4.QtGui import QApplication
 
 # Forms
@@ -11,6 +11,12 @@ from src.MainWindow import MainWindow
 
 # sys
 import sys
+
+def get_lang_code(full_lang_name):
+	llang = str(full_lang_name).split('_')
+	if len(llang) > 1:
+		return llang[0]
+	return None
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)
@@ -22,8 +28,12 @@ if __name__ == '__main__':
 	
 	trans_path = QLibraryInfo.location(QLibraryInfo.TranslationsPath)
 	translator = QTranslator(app)
-	translator.load( "qt_%s" % locale.languageToString(locale.language()),  trans_path)
-	app.installTranslator(translator)
+	lang = get_lang_code(locale.name())
+	if lang is not None:
+		trans_file = QString("qt_%s" % lang)
+		#print trans_file
+		translator.load(trans_file ,  trans_path)
+		app.installTranslator(translator)
 
 	
 	w = MainWindow()
