@@ -33,9 +33,31 @@ class Device:
 		return self._type
 	def device_id(self):
 		return self._id
-	def device_modules(self):
-		return self._modules.keys()
+	def device_modules(self, exclude_module_name = None):
+		if exclude_module_name is None:
+			return self._modules.keys()
+		else:
+			temp_m = []
+			for m in self._modules:
+				if m == exclude_module_name:
+					continue
+				temp_m.append(m)
+			return temp_m
 	def device_package_by_module(self, module):
 		if module in self._modules.keys():
 			return self._modules[module]
 		return []
+
+	def packages_to_install(self, module):
+		pkgs = self.device_package_by_module(module)
+		return pkgs
+
+	def packages_to_remove(self, module):
+		pkgs = []
+		for m in self._modules:
+			if m == module:
+				continue
+
+			pkgs += self.device_package_by_module(m)
+
+		return pkgs

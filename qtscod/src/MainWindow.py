@@ -3,29 +3,36 @@
 
 from PyQt4.QtCore import QSize,QString
 from PyQt4.QtGui import QMainWindow, QMessageBox, QDialogButtonBox
-#from PyQt4.QtCore.Qt import tr
 from ui.MainWindow import Ui_MainWindow
 
 from src.ListenThread import ListenThread
 from src.DevicesListModel import DevicesListModel
+from src.ActionsModel import ActionsModel
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 	def __init__(self, parent = None):
 		QMainWindow.__init__(self, parent)
 		self.setupUi(self)
 		self._init_menu()
+		self._init_models()
 		self.lt = ListenThread(self.add_new_device)
-		self.model = DevicesListModel(self)
-		self.listView.setModel(self.model)
-		self.listView.selectionModel().currentChanged.connect(self._handle_select_item)
-		#self._right_frame_modif = False
-		#self.comboBoxModules.currentIndexChanged.connect(self._handle_select_module)
+		
+		# right frame
+		self.comboBoxModules.currentIndexChanged.connect(self._handle_select_module)
 		self.buttonBoxDetails.clicked.connect(self._handle_rbb)
 
 	def _init_menu(self):
 		self.actionFileExit.triggered.connect(self._handle_exit)
+	
+	def _init_models(self):
+		self.model = DevicesListModel(self)
+		self.listView.setModel(self.model)
+		self.listView.selectionModel().currentChanged.connect(self._handle_select_item)
 
-	def add_new_device(self, dev): #FIXME: add object Device
+		self.act_model = ActionsModel(self)
+		self.listViewActions.setModel(self.act_model)
+	
+	def add_new_device(self, dev): 
 		self.model.add_new_device(dev)
 		self.show_notification()
 
@@ -38,26 +45,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 	def _right_frame_apply(self, idx):
 		d = self.model.device_by_index(idx)
+		sel_cb_idx = self.comboBoxModules.currentIndex()
+		sel_module = str(self.comboBoxModules.itemData(sel_cb_idx).toString())
+		pkgsi = d.packages_to_install(sel_module)
+		pkgsr = d.packages_to_remove(sel_module)
 		# TODO: make a actions for device
-	
-	def set_right_frame(self, idx):
-		#print "Changed row: %s, column %s" % (idx.row(), idx.column())
-		#if self._right_frame_modif:
-		#	result = QMessageBox.question(self, self.tr('Reset changes'), 
-		#				self.tr('You not applying changes. Apply it?'), QMessageBox.Yes and QMessageBox.No, QMessageBox.Yes)
-		#	if result == QMessageBox.Yes:
-		#		self._right_frame_apply()
-
-		self.comboBoxModules.clear()
-		#self._right_frame_modif = False
+		if len(pkgsi) > 0:
+			self.act_model.add_new_action(sel_module, pkgsi, 0)
+		if len(pkgsr) > 0:	
+			rem_mds = str(', ').join(d.device_modules(sel_module))
+			self.act_model.add_new_action(rem_mds, pkgsr, 1)
 		
-		d = self.model.device_by_index(idx)
+	
+	def _current_device(self, idx = None):
+		cur_idx = idx
+		if idx is None:
+			cur_idx = self.listView.selectionModel().currentIndex()
+		return self.model.device_by_index(cur_idx)
+
+	def set_right_frame(self, idx):
+		self.comboBoxModules.clear()
+		d = self._current_device(idx)
 		curdrv = QString()
 		if d.current_driver() is None or len(d.current_driver()) == 0:
 			curdrv = self.tr('Not installed')
 		else:
 			curdrv = QString('- %s -' % d.current_driver())
-		self.comboBoxModules.addItem(curdrv, d.current_driver())
+		self.comboBoxModules.addItem(curdrv, QString(d.current_driver()))
 
 		self.lineEditName.setText(d.device_name())
 		for m in d.device_modules():
@@ -66,7 +80,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				continue
 			else:
 				devmod = QString('%s' % m)
-			self.comboBoxModules.addItem(devmod, m)
+			self.comboBoxModules.addItem(devmod, QString(m))
 
 	# slots
 	def _handle_exit(self):
@@ -82,10 +96,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		if self.buttonBoxDetails.buttonRole(but) == QDialogButtonBox.ResetRole:
 			self.set_right_frame(cur_idx)
 		elif self.buttonBoxDetails.buttonRole(but) == QDialogButtonBox.ApplyRole:
-			self._right_frame_apply()
+			self._right_frame_apply(cur_idx)
 
 
-	#def _handle_select_module(self, module_index):
-		#selection_module_name = self.comboBoxModules.itemText(module_index)
-		#print "Module changed %s" % selection_module_name
-		#self._right_frame_modif = True
+	def _handle_select_module(self, module_index):
+		if module_index == -1:
+			self.labelDetails.setText('')
+			return
+		selection_module_name = str(self.comboBoxModules.itemData(module_index).toString())
+		print "Module changed at pos %s - %s" % (module_index, selection_module_name)
+		d = self._current_device()
+		pkgsi = d.packages_to_install(selection_module_name)
+		pkgsr = d.packages_to_remove(selection_module_name)
+		detail_html = QString('<h4>%1 </h4>').arg(self.tr('For installing this module need:'))
+		if len(pkgsi) > 0:
+			detail_html += QString('<p>%1 <ul>').arg(self.tr('Packages to install:'))
+			for p in pkgsi:
+				detail_html += QString('<li>%1</li>').arg(p)
+			detail_html += QString('</ul></p>')
+		if len(pkgsr) > 0:
+			detail_html += QString('<p>%1 <ul>').arg(self.tr('Packages to remove: '))
+			for p in pkgsr:
+				detail_html += QString('<li>%1</li>').arg(p)
+			detail_html += QString('</ul></p>')
+
+		self.labelDetails.setText(detail_html)
