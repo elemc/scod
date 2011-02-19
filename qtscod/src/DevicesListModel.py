@@ -14,8 +14,8 @@ class DevicesListModel(QAbstractListModel):
 		self.update_model()
 
 	def load_img(self):
-		self.wifi_icon = QIcon("img/wifi.svg")
-		self.hard_icon = QIcon("img/hardware.svg")
+		self.wifi_icon = QIcon("../img/wifi.svg")
+		self.hard_icon = QIcon("../img/hardware.svg")
 		
 	# Common methods
 	def columnCount( self, parent = QModelIndex() ):

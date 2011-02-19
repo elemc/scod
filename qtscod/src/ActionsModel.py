@@ -20,7 +20,7 @@ class ActionsModel(QAbstractListModel):
 		self.actions = [] # main data container
 
 	def _load_imgs(self):
-		self.gears_icon = QIcon("img/gears.svg")	
+		self.gears_icon = QIcon("../img/gears.svg")	
 
 	def _view_name(self, act):
 		act_type = self.tr('Installing')

@@ -1,0 +1,11 @@
+Development version of SCOD
+Please use this scripts only for testing.
+
+Daemon:
+	1. change fullpath to devices.conf in scoddevice.py
+	2. to start daemon use 'python scodd.py'
+
+Qt client:
+	1. change dir to qtscod/ui and run 'make' for generate py-script on ui-file
+	2. and run 'python qtscod.py'
+
