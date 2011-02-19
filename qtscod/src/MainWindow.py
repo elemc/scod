@@ -23,6 +23,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 	def _init_menu(self):
 		self.actionFileExit.triggered.connect(self._handle_exit)
+		# TODO: make context menu + Actions in main menu
 	
 	def _init_models(self):
 		self.model = DevicesListModel(self)
@@ -49,7 +50,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		sel_module = str(self.comboBoxModules.itemData(sel_cb_idx).toString())
 		pkgsi = d.packages_to_install(sel_module)
 		pkgsr = d.packages_to_remove(sel_module)
-		# TODO: make a actions for device
 		if len(pkgsi) > 0:
 			self.act_model.add_new_action(sel_module, pkgsi, 0)
 		if len(pkgsr) > 0:	
