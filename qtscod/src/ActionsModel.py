@@ -2,15 +2,18 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore
-from PyQt4.QtCore import Qt, QAbstractListModel, QModelIndex, QVariant, QString
+from PyQt4.QtCore import Qt, QAbstractListModel, QModelIndex, QVariant, QString, pyqtSignal
 from PyQt4.QtGui import QIcon
 
 ''' Some action dict example
+	act_dict['devid']= device_id			# sys_path for device
 	act_dict['name'] = module_name 			# 'nvidia' as example
 	act_dict['type'] = 0 or 1				# 0 - to install, 1 - to remove
 	act_dict['pkgs'] = packages_to_action	# ['akmod-simple-2.3', 'kmod-simple-2.3*']
 '''
 class ActionsModel(QAbstractListModel):
+	actionDeleted = pyqtSignal(str)
+
 	def __init__(self, parent = None):
 		QAbstractListModel.__init__(self, parent)
 		self._load_imgs()
@@ -30,8 +33,9 @@ class ActionsModel(QAbstractListModel):
 		res = QString('%1 %2 (%3: %4)').arg(act_type).arg(act_module).arg(act_sp).arg(act_p)
 		return res
 
-	def add_new_action(self, name, pkgs = [], atype=0):
+	def add_new_action(self, devid, name, pkgs = [], atype=0):
 		ad = {}
+		ad['devid'] = devid
 		ad['name']	= name
 		ad['type']	= atype
 		ad['pkgs']	= pkgs
@@ -56,3 +60,21 @@ class ActionsModel(QAbstractListModel):
 			return self.gears_icon
 
 		return QVariant()
+	def removeRows(self, row, count, parent = QModelIndex()):
+		last = row + count - 1
+		self.beginRemoveRows(parent, row, last)
+		remove_items = []
+		remove_range = range(row, last)
+		if count == 1:
+			remove_range = [row]
+		for a in self.actions:
+			if self.actions.index(a) in remove_range:
+				remove_items.append(a)
+		for ra in remove_items:
+			self.actions.remove(ra)
+			self.actionDeleted.emit(ra['devid'])
+		self.endRemoveRows()
+
+	# signals
+#	def actionDeleted(self, dev_id):
+#		pass

@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore
-from PyQt4.QtCore import Qt, QAbstractListModel, QModelIndex
-from PyQt4.QtGui import QIcon
+from PyQt4.QtCore import Qt, QAbstractListModel, QModelIndex, QString
+from PyQt4.QtGui import QIcon, QBrush
 from src.Device import Device
 
 class DevicesListModel(QAbstractListModel):
@@ -40,12 +40,20 @@ class DevicesListModel(QAbstractListModel):
 			if idx.column() == 1:
 				return d.device_type()
 			elif idx.column() == 0:
-				return QtCore.QString(d.device_name())
+				dname = QString(d.device_name())
+				if d.is_hide():
+					dname = QString("%1 (%2)").arg(dname).arg(self.tr("disable notification"))
+				return dname
 		elif role == Qt.DecorationRole:
 			if d.device_type() == 'net':
 				return self.wifi_icon
 			else:
 				return self.hard_icon
+		elif role == Qt.TextColorRole:
+			if len(d.selected_driver()) != 0:
+				blue_brush = QBrush()
+				blue_brush.setColor(Qt.darkBlue)
+				return blue_brush
 
 		return QtCore.QVariant()
 
@@ -66,3 +74,28 @@ class DevicesListModel(QAbstractListModel):
 			return None
 
 		return self.data_list[idx.row()]
+	
+	def index_is_hide(self, idx):
+		if len(self.data_list) < idx.row()-1:
+			return False
+
+		return self.data_list[idx.row()].is_hide()
+	
+	def index_hide(self, idx, val = True):
+		if len(self.data_list) < idx.row()-1:
+			return
+		d = self.data_list[idx.row()]
+		d.set_hide(val)
+		self.dataChanged.emit(idx, idx)
+	
+	def disable_all_devices(self):
+		for d in self.data_list:
+			d.set_hide(True)
+		self.dataChanged.emit(self.index(0,0), self.index(self.rowCount()-1, 0))
+
+	def reset_changes(self, dev_id):
+		for d in self.data_list:
+			if d.device_id() == dev_id:
+				d.set_selected_driver('')
+				row = self.data_list.index(d)
+				self.dataChanged.emit(self.index(row,0), self.index(row,0))

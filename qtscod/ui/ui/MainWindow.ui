@@ -39,7 +39,34 @@
     </property>
     <addaction name="actionFileExit"/>
    </widget>
+   <widget class="QMenu" name="menuActions">
+    <property name="title">
+     <string>&amp;Actions</string>
+    </property>
+    <addaction name="actionActionsDelete"/>
+    <addaction name="separator"/>
+    <addaction name="actionActionsApply"/>
+    <addaction name="actionActionsClear"/>
+   </widget>
+   <widget class="QMenu" name="menuDevices">
+    <property name="title">
+     <string>&amp;Devices</string>
+    </property>
+    <addaction name="actionDevicesDisable"/>
+    <addaction name="separator"/>
+    <addaction name="actionDevicesDisableAll"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionAboutQt"/>
+   </widget>
    <addaction name="menu_File"/>
+   <addaction name="menuDevices"/>
+   <addaction name="menuActions"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dockWidgetDetails">
@@ -142,6 +169,71 @@
   <action name="actionFileExit">
    <property name="text">
     <string>E&amp;xit</string>
+   </property>
+   <property name="statusTip">
+    <string>Close application window</string>
+   </property>
+  </action>
+  <action name="actionActionsDelete">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Delete action</string>
+   </property>
+   <property name="statusTip">
+    <string>Delete selected action</string>
+   </property>
+  </action>
+  <action name="actionActionsClear">
+   <property name="text">
+    <string>&amp;Cancel actions</string>
+   </property>
+   <property name="statusTip">
+    <string>Cancel all actions in list</string>
+   </property>
+  </action>
+  <action name="actionDevicesDisable">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Disable &amp;notification</string>
+   </property>
+   <property name="statusTip">
+    <string>Enable/Disable selected device</string>
+   </property>
+  </action>
+  <action name="actionDevicesDisableAll">
+   <property name="text">
+    <string>Disable notif for &amp;all</string>
+   </property>
+   <property name="statusTip">
+    <string>Disable notification for all devices</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>&amp;About...</string>
+   </property>
+   <property name="statusTip">
+    <string>About application</string>
+   </property>
+  </action>
+  <action name="actionAboutQt">
+   <property name="text">
+    <string>About &amp;Qt...</string>
+   </property>
+   <property name="statusTip">
+    <string>About Qt</string>
+   </property>
+  </action>
+  <action name="actionActionsApply">
+   <property name="text">
+    <string>&amp;Apply all actions</string>
+   </property>
+   <property name="statusTip">
+    <string>Apply all actions in list</string>
    </property>
   </action>
  </widget>

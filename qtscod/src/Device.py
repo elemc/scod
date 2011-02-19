@@ -8,6 +8,8 @@ class Device:
 		self._id				= ""
 		self._modules			= {}
 		self._current_driver	= ""
+		self._hide_this			= False
+		self._selected_driver	= ""
 
 		if dev is not None:
 			self.set_dev(dev)
@@ -25,6 +27,15 @@ class Device:
 		self._modules			= self._extract_data(dev, 'modules')
 		self._current_driver	= self._extract_data(dev, 'current_driver')
 
+	def set_hide(self, val = True):
+		self._hide_this = val
+	def is_hide(self):
+		return self._hide_this
+
+	def selected_driver(self):
+		return self._selected_driver
+	def set_selected_driver(self, newdrv):
+		self._selected_driver = newdrv
 	def current_driver(self):
 		return self._current_driver
 	def device_name(self):
