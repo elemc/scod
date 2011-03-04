@@ -12,6 +12,8 @@ class NvidiaVersion:
 		self._load_info_board()
 
 	def _load_info_ver(self):
+		if not os.path.exists('/proc/driver/nvidia'):
+			return
 		f = open('/proc/driver/nvidia/version', 'r')
 		str_i = 0
 		nvrm = []
