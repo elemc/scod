@@ -2,6 +2,7 @@
 
 import ConfigParser
 from pyudev import Context
+from nvidiaversion import NvidiaVersion
 
 class SCODDevice:
 	def __init__(self, dev):
@@ -86,6 +87,15 @@ class SCODDevice:
 
 			if vendor_id == '10DE':
 				self.dev_name = 'NVIDIA video adapter'
+				nv = NvidiaVersion()
+				if nv.nvidia_board_name is not None:
+					self.dev_name = 'NVIDIA %s' % nv.nvidia_board_name
+				if nv.nvidia_driver_ver_list is not None:
+					major_module_ver = nv.nvidia_driver_ver_list[0]
+					if major_module_ver == '173':
+						self.dev_driver = 'nvidia-173xx'
+					elif major_module_ver == '96':
+						self.dev_driver = 'nvidia-96xx'
 			elif vendor_id == '1002':
 				self.dev_name = 'ATI video adapter'
 
