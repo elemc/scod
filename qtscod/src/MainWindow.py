@@ -9,6 +9,8 @@ from src.ListenThread import ListenThread
 from src.DevicesListModel import DevicesListModel
 from src.ActionsModel import ActionsModel
 
+from packagekitwrapper import PackageKitClient, PackageKitError 
+
 class MainWindow(QMainWindow, Ui_MainWindow):
 	def __init__(self, parent = None):
 		QMainWindow.__init__(self, parent)
@@ -17,6 +19,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self._init_actions()
 		self._init_models()
 		self.lt = ListenThread(self.add_new_device)
+		self._install_akmods = False
 		
 		# right frame
 		self.comboBoxModules.currentIndexChanged.connect(self._handle_select_module)
@@ -40,6 +43,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self.actionDevicesDisableAll.triggered.connect(self._handle_disable_all)
 		self.actionActionsDelete.triggered.connect(self._handle_remove_current_action)
 		self.actionActionsClear.triggered.connect(self._handle_clean_actions)
+		self.actionActionsApply.triggered.connect(self._handle_apply_actions)
 
 	def _init_models(self):
 		self.model = DevicesListModel(self)
@@ -70,6 +74,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		sel_module = str(self.comboBoxModules.itemData(sel_cb_idx).toString())
 		if sel_module == d.current_driver():
 			return
+		
+		self.act_model.remove_actions_by_devid(d.device_id(), sel_module)
 		pkgsi = d.packages_to_install(sel_module)
 		pkgsr = d.packages_to_remove(sel_module)
 		if len(pkgsi) > 0:
@@ -113,6 +119,61 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		if our_sel_idx != -1:
 			self.comboBoxModules.setCurrentIndex(our_sel_idx)
 
+	def _do_resolve_packages(self, pkgs, to_remove = False):
+		pkc = PackageKitClient()
+		filt = 'none'
+		if to_remove:
+			filt = 'installed'
+			pkg_ids = pkc.SearchNames(filt, pkgs)
+			return pkg_ids
+		pkg_ids = pkc.Resolve(filt, pkgs)
+
+		return pkg_ids
+
+	def _do_install_packages(self, pkgs):
+		if len(pkgs) == 0:
+			return
+		pkc = PackageKitClient()
+		pkc.InstallPackages(pkgs)
+
+	def _do_remove_packages(self, pkgs):
+		if len(pkgs) == 0:
+			return
+		pkc = PackageKitClient()
+		pkc.RemovePackages(pkgs)
+
+	def _do_only_ids(self, pkgs):
+		res_ids = []
+		for installed, id, summary in res_ids:
+			res_ids.append(id)
+		return res_ids
+
+	def _do_act(self):
+		pkgs_to_install = []
+		pkgs_to_remove	= []
+		for act in self.act_model.actions:
+			for p in act['pkgs']:
+				if act['type'] == 0:
+					pkgs_to_install.append(p)
+					if self._install_akmods:
+						pkgs_to_install.append('a%s' % p)
+				elif act['type'] == 1:
+					pkgs_to_remove.append('a%s' % p)
+					pkgs_to_remove.append(p)
+
+		# Resolve all packages
+		pkg_ids_install = self._do_resolve_packages(pkgs_to_install)
+		pkg_ids_remove = self._do_resolve_packages(pkgs_to_remove, True)
+
+		self._do_remove_packages(self._do_only_ids(pkgs_to_remove))
+		self._do_install_packages(self._do_only_ids(pkgs_to_install))
+
+		print "Packages to install:" 
+		for pi_info,pi_id,pi_sum in pkg_ids_install:
+			print "+ %s (%s) installed: %s" % (pi_id, pi_sum, pi_info)
+		print "Packages to remove:" 
+		for pr_info,pr_id,pr_sum in pkg_ids_remove:
+			print "- %s (%s) installed: %s" % (pr_id, pr_sum, pr_info)
 
 	# slots
 	def _handle_data_changed_in_model(self, begin_idx, end_idx):
@@ -131,7 +192,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self.act_model.removeRows(cur_idx.row(), 1)
 
 	def _handle_clean_actions(self):
-		self.act_model.removeRows(0, self.act_model.rowCount())
+		self.act_model.clearRows()
 
 	def _handle_disable_all(self):
 		self.model.disable_all_devices()
@@ -189,3 +250,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			detail_html += QString('</ul></p>')
 
 		self.labelDetails.setText(detail_html)
+
+	def _handle_apply_actions(self):
+		result = QMessageBox.question(self, self.tr('Install akmods too'), 
+							self.tr('Do you have install also akmod (automated kernel module) packages too?'),
+							QMessageBox.Yes and QMessageBox.No, QMessageBox.Yes)
+		if result == QMessageBox.Yes:
+			self._install_akmods = True
+		
+		self._do_act()

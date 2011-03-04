@@ -75,6 +75,19 @@ class ActionsModel(QAbstractListModel):
 			self.actionDeleted.emit(ra['devid'])
 		self.endRemoveRows()
 
-	# signals
-#	def actionDeleted(self, dev_id):
-#		pass
+	def clearRows(self):
+		self.beginRemoveRows(QModelIndex(), 0, self.rowCount())
+		for act in self.actions:
+			self.actionDeleted.emit(act['devid'])
+		self.actions = []
+		self.endRemoveRows()
+
+	def remove_actions_by_devid(self, sel_dev_id, module_name):
+		act_to_remove = {}
+		for act in self.actions:
+			if act['devid'] == sel_dev_id: # and act['name'] != module_name:
+				row = self.actions.index(act)
+				act_to_remove[row] = act
+		for idx in act_to_remove.keys():
+			self.actions.remove(act_to_remove[idx])
+			self.dataChanged.emit(self.index(idx, 0), self.index(idx, 0))
