@@ -3,13 +3,13 @@
 
 class Device:
 	def __init__(self, dev = None):
-		self._name				= ""
-		self._type				= ""
-		self._id				= ""
-		self._modules			= {}
-		self._current_driver	= ""
-		self._hide_this			= False
-		self._selected_driver	= ""
+		self._name			= ""
+		self._type			= ""
+		self._id		        = ""
+		self._modules		        = {}
+		self._current_driver            = ""
+		self._hide_this                 = False
+		self._selected_driver	        = ""
 
 		if dev is not None:
 			self.set_dev(dev)
@@ -21,10 +21,10 @@ class Device:
 		return ""
 
 	def set_dev(self, dev):
-		self._name				= self._extract_data(dev, 'name')
-		self._type				= self._extract_data(dev, 'type')
-		self._id				= self._extract_data(dev, 'id')
-		self._modules			= self._extract_data(dev, 'modules')
+		self._name		= self._extract_data(dev, 'name')
+		self._type		= self._extract_data(dev, 'type')
+		self._id		= self._extract_data(dev, 'id')
+		self._modules		= self._extract_data(dev, 'modules')
 		self._current_driver	= self._extract_data(dev, 'current_driver')
 
 	def set_hide(self, val = True):

@@ -191,7 +191,7 @@ class PackageKitClient:
         pk_xn.connect_to_signal('ErrorCode', self._h_error)
         pk_xn.connect_to_signal('Finished', self._h_finished)
         if install:
-            pk_xn.InstallPackages(package_ids)
+            pk_xn.InstallPackages(False, package_ids)
         else:
             #pk_xn.RemovePackages(package_ids, allow_deps, auto_remove)
             pk_xn.RemovePackages(package_ids, True, False)

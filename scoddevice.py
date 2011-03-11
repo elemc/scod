@@ -3,26 +3,32 @@
 import ConfigParser
 from pyudev import Context
 from nvidiaversion import NvidiaVersion
+import os.path
+from scodcache import SCODCache
 
 class SCODDevice:
 	def __init__(self, dev):
 		self.conffile = '/home/alex/workspace/scod/devices.conf'
-		self.our_devices = {}
+		self.our_devices        = {}
+		self.disabled_devices   = []
 		self._init_configs()
+		self._init_cache()
 
 		self.dev_type		= ""
-		self.dev_id			= ""
+		self.dev_id		= ""
 		self.dev_modules	= {}
 		self.dev_name		= ""
 		self.dev_driver		= ""
 
-		if dev is not None:
+		if (dev is not None) and (str(dev.sys_path) not in self.disabled_devices):
 			self._check_device(dev)
 
 	def __del__(self):
 		self.our_devices.clear()
 
 	def isOurDevice(self):
+		if self.dev_id in self.disabled_devices:
+			return False
 		if len(self.dev_modules)*len(self.dev_id) == 0:
 			return False
 		return True
@@ -125,3 +131,8 @@ class SCODDevice:
 			s['packages'] = packages
 			s['aliases'] = aliases
 			self.our_devices[sect] = s
+
+	def _init_cache(self):
+		sc = SCODCache()
+		self.disabled_devices = sc.read_ddn()
+

@@ -32,7 +32,7 @@ class SCODDaemon:
 			return
 	
 		time.sleep(0.1)
-		if ('MODALIAS' not in dev.keys()): # and ( 'modalias' not in dev.attributes.keys()  ):
+		if ('MODALIAS' not in dev.keys()):
 			return
 
 		d = SCODDevice(dev)

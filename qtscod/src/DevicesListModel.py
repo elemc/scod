@@ -87,11 +87,15 @@ class DevicesListModel(QAbstractListModel):
 		d = self.data_list[idx.row()]
 		d.set_hide(val)
 		self.dataChanged.emit(idx, idx)
+		return d.device_id()
 	
 	def disable_all_devices(self):
+		ret_devs = []
 		for d in self.data_list:
 			d.set_hide(True)
+			ret_devs.append(d.device_id())
 		self.dataChanged.emit(self.index(0,0), self.index(self.rowCount()-1, 0))
+		return ret_devs
 
 	def reset_changes(self, dev_id):
 		for d in self.data_list:

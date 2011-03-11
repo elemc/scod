@@ -38,8 +38,22 @@ class ListenThread(QThread):
 	def stop(self):
 		QEventLoop().exit()
 
-	def request_device(self, dev_id):
-		pass	
+	def disable_device_notif(self, dev_id):
+		dest = []
+		if type(dev_id) is str:
+			dest.append(dev_id)
+		elif type(dev_id) is list:
+			dest = dev_id
+		else:
+			dest.append(str(dev_id))
+		res = self.iface_cmd.disableDeviceNotification(dest)
+		if not res:
+			print "Error in disableDeviceNotification"
+
+	def enable_device_notif(self, dev_id):
+		res = self.iface_cmd.enableDeviceNotification(dev_id)
+		if not res:
+			print "Error in enableDeviceNotification"
 
 	def new_device_handler(self, dev_id, dev_name, dev_type):
 		if self.mw is None:

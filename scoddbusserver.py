@@ -6,6 +6,8 @@ import gobject
 from dbus.mainloop.glib import DBusGMainLoop, threads_init
 from threading import Thread
 import time
+import os, os.path
+from scodcache import SCODCache
 
 global_service_name = 'ru.russianfedora.SCOD'
 global_service_path = '/ru/russianfedora/SCOD'
@@ -15,7 +17,23 @@ class SCODDBUSServer(dbus.service.Object):
 		name = dbus.service.BusName(global_service_name, dbus.SessionBus())
 		dbus.service.Object.__init__(self, name, global_service_path)
 		self.devices = {}
-			
+
+	def _dbus_array_to_list(self, da):
+		ret_res = []
+		for ds in da:
+			ret_res.append(str(ds))
+		return ret_res
+
+	@dbus.service.method(dbus_interface=global_service_name, in_signature='as', out_signature='b')	
+	def disableDeviceNotification(self, dev_id):
+		sc = SCODCache()
+		return sc.add_to_ddn(self._dbus_array_to_list(dev_id))
+	
+	@dbus.service.method(dbus_interface=global_service_name, in_signature='s', out_signature='b')
+	def enableDeviceNotification(self, dev_id):
+		sc = SCODCache()
+		return sc.del_from_ddn(dev_id)
+
 	@dbus.service.signal(dbus_interface=global_service_name, signature='sss') #signature='ssass')
 	def new_device(self, dev_id, dev_name, dev_type):
 		pass

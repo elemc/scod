@@ -65,6 +65,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self.model.add_new_device(dev)
 		self.show_notification()
 
+	def disen_device_notif(self, device_id, disable = False):
+		if disable:
+			self.lt.disable_device_notif(device_id)
+		else:
+			self.lt.enable_device_notif(device_id)
+
 	def show_notification(self):
 		if self.isHidden():
 			self.show()
@@ -83,7 +89,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		pkgsi = d.packages_to_install(sel_module)
 		pkgsr = d.packages_to_remove(sel_module)
 		if len(pkgsi) > 0:
-			self.act_model.add_new_action(d.device_id(), sel_module, pkgsi, 0)
+			self.act_model.add_new_action(d.device_id(), 
+						      sel_module, pkgsi, 0)
 		if len(pkgsr) > 0:	
 			rem_mds = str(', ').join(d.device_modules(sel_module))
 			self.act_model.add_new_action(d.device_id(), rem_mds, pkgsr, 1)
@@ -179,10 +186,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		pkg_ids_install = self._do_resolve_packages(pkgs_to_install)
 		pkg_ids_remove = self._do_resolve_packages(pkgs_to_remove, True)
 
-		self.setEnabled(False)
 		self._do_remove_packages(self._do_only_ids(pkg_ids_remove))
 		self._do_install_packages(self._do_only_ids(pkg_ids_install))
-		self.setEnabled(True)
 
 		print "Packages to install:"
 		self._debug_print_pkg_ids(pkg_ids_install)
@@ -216,12 +221,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self.act_model.clearRows()
 
 	def _handle_disable_all(self):
-		self.model.disable_all_devices()
+		devs = self.model.disable_all_devices()
+		self.disen_device_notif(devs, True)
 
 	def _handle_disable_device(self):
 		cur_idx = self.listView.selectionModel().currentIndex()
-		self.model.index_hide(cur_idx, not self.model.index_is_hide(cur_idx))
+		this_is_hide_item = self.model.index_is_hide(cur_idx)
+		need_id = self.model.index_hide(cur_idx, not this_is_hide_item)
 		self._handle_select_item(cur_idx, cur_idx)
+		
+		self.disen_device_notif(need_id, not this_is_hide_item)
 
 	def _handle_exit(self):
 		self.hide()
@@ -254,7 +263,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			self.labelDetails.setText('')
 			return
 		selection_module_name = str(self.comboBoxModules.itemData(module_index).toString())
-		#print "Module changed at pos %s - %s" % (module_index, selection_module_name)
 		d = self._current_device()
 		pkgsi = d.packages_to_install(selection_module_name)
 		pkgsr = d.packages_to_remove(selection_module_name)
@@ -280,4 +288,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			if result == QMessageBox.Yes:
 				self._install_akmods = True
 		
+		self.setEnabled(False)
 		self._do_act()
+		self.setEnabled(True)
