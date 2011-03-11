@@ -193,7 +193,8 @@ class PackageKitClient:
         if install:
             pk_xn.InstallPackages(package_ids)
         else:
-            pk_xn.RemovePackages(package_ids, allow_deps, auto_remove)
+            #pk_xn.RemovePackages(package_ids, allow_deps, auto_remove)
+            pk_xn.RemovePackages(package_ids, True, False)
         self._wait()
         if self._error_enum:
             raise PackageKitError(self._error_enum)

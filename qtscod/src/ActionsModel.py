@@ -106,3 +106,10 @@ class ActionsModel(QAbstractListModel):
 					pkgs_to_remove.append(p)
 		
 		return (pkgs_to_install,pkgs_to_remove)
+
+	def pkgs_to_install_exist(self):
+		ret_res = False
+		for act in self.actions:
+			if act['type'] == 0:
+				ret_res = True
+		return ret_res

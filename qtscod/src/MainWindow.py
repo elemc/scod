@@ -154,6 +154,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 	def _do_only_ids(self, pkgs):
 		res_ids = []
+		if pkgs is None:
+			return res_ids
 		if len(pkgs) == 0:
 			return res_ids
 		print pkgs
@@ -177,15 +179,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		pkg_ids_install = self._do_resolve_packages(pkgs_to_install)
 		pkg_ids_remove = self._do_resolve_packages(pkgs_to_remove, True)
 
+		self.setEnabled(False)
 		self._do_remove_packages(self._do_only_ids(pkg_ids_remove))
 		self._do_install_packages(self._do_only_ids(pkg_ids_install))
+		self.setEnabled(True)
 
 		print "Packages to install:"
 		self._debug_print_pkg_ids(pkg_ids_install)
 		
 		print "Packages to remove:"
 		self._debug_print_pkg_ids(pkg_ids_remove)
-
+		res = QMessageBox.question(self, 
+					   self.tr("Operations done"), 
+					   self.tr("All operations applied. You may reboot a system. Reboot now?"),
+					   QMessageBox.Yes and QMessageBox.No, QMessageBox.Yes)
+		if res == QMessageBox.Yes:
+			print 'rebooting'
+					   
 	# slots
 	def _handle_data_changed_in_model(self, begin_idx, end_idx):
 		cur_idx = self.listView.selectionModel().currentIndex()
@@ -263,10 +273,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self.labelDetails.setText(detail_html)
 
 	def _handle_apply_actions(self):
-		result = QMessageBox.question(self, self.tr('Install akmods too'), 
+		if self.act_model.pkgs_to_install_exist():
+			result = QMessageBox.question(self, self.tr('Install akmods too'), 
 					      self.tr('Do you have install also akmod (automated kernel module) packages too?'),
 					      QMessageBox.Yes and QMessageBox.No, QMessageBox.Yes)
-		if result == QMessageBox.Yes:
-			self._install_akmods = True
+			if result == QMessageBox.Yes:
+				self._install_akmods = True
 		
 		self._do_act()
