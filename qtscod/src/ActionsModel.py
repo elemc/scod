@@ -91,3 +91,18 @@ class ActionsModel(QAbstractListModel):
 		for idx in act_to_remove.keys():
 			self.actions.remove(act_to_remove[idx])
 			self.dataChanged.emit(self.index(idx, 0), self.index(idx, 0))
+
+	def get_packages(self, _install_akmods = False):
+		pkgs_to_install = []
+		pkgs_to_remove = []
+		for act in self.actions:
+			for p in act['pkgs']:
+				if act['type'] == 0:
+					pkgs_to_install.append(p)
+					if _install_akmods:
+						pkgs_to_install.append('a%s' % p)
+				elif act['type'] == 1:
+					pkgs_to_remove.append('a%s' % p)
+					pkgs_to_remove.append(p)
+		
+		return (pkgs_to_install,pkgs_to_remove)

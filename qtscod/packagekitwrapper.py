@@ -117,7 +117,7 @@ class PackageKitClient:
         self._InstRemovePackages(package_ids, progress_cb, True, None, None)
 
     def RemovePackages(self, package_ids, progress_cb=None, allow_deps=False,
-        auto_remove=True):
+        auto_remove=False):
         '''Remove a list of package IDs.
 
         progress_cb is a function taking arguments (status, percentage,

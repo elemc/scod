@@ -20,6 +20,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 		self._init_models()
 		self.lt = ListenThread(self.add_new_device)
 		self._install_akmods = False
+		self._main_pko = None #PackageKitClient()
 		
 		# right frame
 		self.comboBoxModules.currentIndexChanged.connect(self._handle_select_module)
@@ -56,7 +57,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 		self.act_model.actionDeleted.connect(self.model.reset_changes)
 		self.model.dataChanged.connect(self._handle_data_changed_in_model)
-	
+	def _init_pk(self):
+		if self._main_pko is None:
+			self._main_pko = PackageKitClient()
+
 	def add_new_device(self, dev): 
 		self.model.add_new_device(dev)
 		self.show_notification()
@@ -110,7 +114,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				continue
 			elif m == d.selected_driver():
 				devmod = QString('* %s *' % m)
-				#self.comboBoxModules.setCurrentIndex(self.comboBoxModules.count())
 				our_sel_idx = self.comboBoxModules.count()
 			else:
 				devmod = QString('%s' % m)
@@ -120,7 +123,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 			self.comboBoxModules.setCurrentIndex(our_sel_idx)
 
 	def _do_resolve_packages(self, pkgs, to_remove = False):
-		pkc = PackageKitClient()
+		if len(pkgs) == 0:
+			return
+		self._init_pk()
+		pkc = self._main_pko #PackageKitClient()
 		filt = 'none'
 		if to_remove:
 			filt = 'installed'
@@ -133,47 +139,52 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 	def _do_install_packages(self, pkgs):
 		if len(pkgs) == 0:
 			return
-		pkc = PackageKitClient()
+		print "Begin install packages"
+		self._init_pk()
+		pkc = self._main_pko #PackageKitClient()
 		pkc.InstallPackages(pkgs)
 
 	def _do_remove_packages(self, pkgs):
 		if len(pkgs) == 0:
 			return
-		pkc = PackageKitClient()
+		print "Begin remove packages"
+		self._init_pk()
+		pkc = self._main_pko #PackageKitClient()
 		pkc.RemovePackages(pkgs)
 
 	def _do_only_ids(self, pkgs):
 		res_ids = []
-		for installed, id, summary in res_ids:
+		if len(pkgs) == 0:
+			return res_ids
+		print pkgs
+		for installed, id, summary in pkgs:
 			res_ids.append(id)
 		return res_ids
 
+	def _debug_print_pkg_ids(self, pkg_ids):
+		if pkg_ids is None:
+			return
+		elif len(pkg_ids) == 0:
+			return
+		for pi_info,pi_id,pi_sum in pkg_ids:
+			print "+ %s (%s) installed: %s" % (pi_id, pi_sum, pi_info)
+		
+
 	def _do_act(self):
-		pkgs_to_install = []
-		pkgs_to_remove	= []
-		for act in self.act_model.actions:
-			for p in act['pkgs']:
-				if act['type'] == 0:
-					pkgs_to_install.append(p)
-					if self._install_akmods:
-						pkgs_to_install.append('a%s' % p)
-				elif act['type'] == 1:
-					pkgs_to_remove.append('a%s' % p)
-					pkgs_to_remove.append(p)
+		pkgs_to_install, pkgs_to_remove = self.act_model.get_packages(self._install_akmods)
 
 		# Resolve all packages
 		pkg_ids_install = self._do_resolve_packages(pkgs_to_install)
 		pkg_ids_remove = self._do_resolve_packages(pkgs_to_remove, True)
 
-		self._do_remove_packages(self._do_only_ids(pkgs_to_remove))
-		self._do_install_packages(self._do_only_ids(pkgs_to_install))
+		self._do_remove_packages(self._do_only_ids(pkg_ids_remove))
+		self._do_install_packages(self._do_only_ids(pkg_ids_install))
 
-		print "Packages to install:" 
-		for pi_info,pi_id,pi_sum in pkg_ids_install:
-			print "+ %s (%s) installed: %s" % (pi_id, pi_sum, pi_info)
-		print "Packages to remove:" 
-		for pr_info,pr_id,pr_sum in pkg_ids_remove:
-			print "- %s (%s) installed: %s" % (pr_id, pr_sum, pr_info)
+		print "Packages to install:"
+		self._debug_print_pkg_ids(pkg_ids_install)
+		
+		print "Packages to remove:"
+		self._debug_print_pkg_ids(pkg_ids_remove)
 
 	# slots
 	def _handle_data_changed_in_model(self, begin_idx, end_idx):
@@ -253,8 +264,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 	def _handle_apply_actions(self):
 		result = QMessageBox.question(self, self.tr('Install akmods too'), 
-							self.tr('Do you have install also akmod (automated kernel module) packages too?'),
-							QMessageBox.Yes and QMessageBox.No, QMessageBox.Yes)
+					      self.tr('Do you have install also akmod (automated kernel module) packages too?'),
+					      QMessageBox.Yes and QMessageBox.No, QMessageBox.Yes)
 		if result == QMessageBox.Yes:
 			self._install_akmods = True
 		
