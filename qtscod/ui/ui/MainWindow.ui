@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>New devices</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../../../img/gears.svg</normaloff>../../../img/gears.svg</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
@@ -166,6 +170,24 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionDevicesDisable"/>
+   <addaction name="actionDevicesDisableAll"/>
+   <addaction name="separator"/>
+   <addaction name="actionActionsApply"/>
+   <addaction name="separator"/>
+   <addaction name="actionActionsDelete"/>
+   <addaction name="actionActionsClear"/>
+  </widget>
   <action name="actionFileExit">
    <property name="text">
     <string>E&amp;xit</string>
@@ -178,6 +200,10 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../img/deleteaction.png</normaloff>../../../img/deleteaction.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Delete action</string>
    </property>
@@ -186,6 +212,10 @@
    </property>
   </action>
   <action name="actionActionsClear">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../img/cancelactions.png</normaloff>../../../img/cancelactions.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Cancel actions</string>
    </property>
@@ -197,6 +227,10 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../img/disable.png</normaloff>../../../img/disable.png</iconset>
+   </property>
    <property name="text">
     <string>Disable &amp;notification</string>
    </property>
@@ -205,6 +239,10 @@
    </property>
   </action>
   <action name="actionDevicesDisableAll">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../img/disableall.png</normaloff>../../../img/disableall.png</iconset>
+   </property>
    <property name="text">
     <string>Disable notif for &amp;all</string>
    </property>
@@ -229,6 +267,10 @@
    </property>
   </action>
   <action name="actionActionsApply">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../img/apply.png</normaloff>../../../img/apply.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Apply all actions</string>
    </property>

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4.QtCore import QSize,QString,Qt
-from PyQt4.QtGui import QMainWindow, QMessageBox, QDialogButtonBox
+from PyQt4.QtGui import QMainWindow, QMessageBox, QDialogButtonBox, QCloseEvent
 from ui.MainWindow import Ui_MainWindow
 
 from src.ListenThread import ListenThread
@@ -25,6 +25,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # right frame
         self.comboBoxModules.currentIndexChanged.connect(self._handle_select_module)
         self.buttonBoxDetails.clicked.connect(self._handle_rbb)
+
+    def closeEvent(self, event):
+        event.ignore()
+        self.hide()
 
     def _init_menu(self):
         self.actionFileExit.triggered.connect(self._handle_exit)
