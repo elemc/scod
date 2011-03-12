@@ -5,7 +5,7 @@ import os.path, os
 
 class SCODCache:
     def __init__(self):
-        self._cache_dir    = './var/cache/scod'
+        self._cache_dir    = '/var/cache/scod'
         self._ddn_filename = 'disabled_devices.list'
         self._ddn_full     = os.path.join(self._cache_dir, self._ddn_filename)
         self.check_cache_dir()

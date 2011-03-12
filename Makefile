@@ -9,6 +9,7 @@ DESTDIR     = /usr
 SYSCONFDIR  = /etc
 DATAROOTDIR = $(DESTDIR)/share/$(NAME)
 BINDIR      = $(DESTDIR)/bin
+DBUS_DIR    = $(SYSCONFDIR)/dbus-1/system.d
 
 # Code files
 CODE_FILES  = nvidiaversion.py \
@@ -28,12 +29,15 @@ uninstall:
 	$(RM) $(SYSCONFDIR)/$(NAME)
 	$(RM) $(DATAROOTDIR)
 	$(RM) $(BINDIR)/$(NAME)
+	$(RM) $(DBUS_DIR)/$(NAME).conf
 
 install: install-sysconf $(CODE_FILES)
-	$(INSTALL) -m 755 scodd.sh $(BINDIR)/scodd
+	$(INSTALL) -m 755 $(NAME).sh $(BINDIR)/$(NAME)
+	$(INSTALL) -m 644 $(NAME).conf $(DBUS_DIR)/$(NAME).conf
 
 mk-sysconfdir:
 	$(MKDIR) $(SYSCONFDIR)/$(NAME)
+	$(MKDIR) $(DBUS_DIR)
 
 install-sysconf: mk-sysconfdir
 	$(INSTALL) -m 644 devices.conf $(SYSCONFDIR)/$(NAME)

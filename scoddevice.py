@@ -8,7 +8,7 @@ from scodcache import SCODCache
 
 class SCODDevice:
     def __init__(self, dev):
-        self.conffile = '/home/alex/workspace/scod/devices.conf'
+        self.conffile         = '/etc/scodd/devices.conf'
         self.our_devices      = {}
         self.disabled_devices = []
         self._init_configs()

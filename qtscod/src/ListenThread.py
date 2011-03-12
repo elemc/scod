@@ -14,7 +14,7 @@ class ListenThread(QThread):
         DBusQtMainLoop(set_as_default=True)
 
         self.mw               = parent_class
-        bus                   = dbus.SessionBus()
+        bus                   = dbus.SystemBus()
         try:
             self.scod         = bus.get_object('ru.russianfedora.SCOD', '/ru/russianfedora/SCOD')
             self.iface_signal = dbus.Interface(self.scod, dbus_interface='ru.russianfedora.SCOD')
