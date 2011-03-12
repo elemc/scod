@@ -7,6 +7,7 @@ all: clean $(UI).py
 
 clean:
 	rm -rf *.py
+	touch __init__.py
 
 $(UI).py:
 	$(MAKEPY) $@ ui/$(UI).ui

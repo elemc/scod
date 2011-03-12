@@ -32,15 +32,15 @@ uninstall:
 	$(RM) $(DBUS_DIR)/$(NAME).conf
 
 install: install-sysconf $(CODE_FILES)
-	$(INSTALL) -m 755 $(NAME).sh $(BINDIR)/$(NAME)
-	$(INSTALL) -m 644 $(NAME).conf $(DBUS_DIR)/$(NAME).conf
+	$(INSTALL) -m 755 tools/$(NAME).sh $(BINDIR)/$(NAME)
+	$(INSTALL) -m 644 conf/$(NAME).conf $(DBUS_DIR)/$(NAME).conf
 
 mk-sysconfdir:
 	$(MKDIR) $(SYSCONFDIR)/$(NAME)
 	$(MKDIR) $(DBUS_DIR)
 
 install-sysconf: mk-sysconfdir
-	$(INSTALL) -m 644 devices.conf $(SYSCONFDIR)/$(NAME)
+	$(INSTALL) -m 644 conf/devices.conf $(SYSCONFDIR)/$(NAME)
 
 mk-dataroot:
 	$(MKDIR) $(DATAROOTDIR)
