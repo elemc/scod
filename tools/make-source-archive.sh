@@ -4,7 +4,7 @@ APP_NAME=scod
 APP_VERSION=0.1.git`date +%Y%m%d`
 APP_ANAME=$APP_NAME-$APP_VERSION
 
-cd ..
+cd ../..
 cp -f -r ./$APP_NAME ./$APP_ANAME
 rm -rf ./$APP_ANAME/.git
 
