@@ -5,6 +5,7 @@ After=dbus.target
 [Service]
 Type=dbus
 ExecStart=/usr/bin/scodd
+BusName=ru.russianfedora.SCOD
 
 [Install]
 WantedBy=multi-user.target
