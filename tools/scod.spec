@@ -13,9 +13,6 @@ URL:            www.russianfedora.ru
 Source0:        http://github.com/elemc/scod/%{name}-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-#BuildRequires:  PyQt4-devel
-#Requires:       dbus, pyudev
-
 BuildArch:	noarch
 
 %description
@@ -37,6 +34,7 @@ SCOD daemon is a service for listen and notification about new and existing devi
 Summary:	SCOD Qt client
 Group:		Applications/System
 Requires:	dbus, PyQt4, scod-daemon
+BuildRequires:	PyQt4-devel
 
 %description client-qt
 Qt frontend for SCOD
@@ -74,6 +72,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/%{qtclient}/*.py*
 %{_datadir}/%{qtclient}/src/*.py*
 %{_datadir}/%{qtclient}/ui/*.py*
+%{_datadir}/%{qtclient}/img/*
 %doc README
 
 %post daemon
