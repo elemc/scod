@@ -10,4 +10,8 @@ class GTKScodMainWindow:
         self.window = self.glade_project.get_widget("main_window")
         if self.window:
             self.window.connect('destroy', gtk.main_quit)
+        self.window.imi_Exit.connect('activate', self.quit)
+
+    def quit(self):
+        gtk.main_quit()
 	

@@ -10,6 +10,7 @@ SYSCONFDIR  = /etc
 DATAROOTDIR = $(DESTDIR)/share/$(NAME)
 BINDIR      = $(DESTDIR)/bin
 DBUS_DIR    = $(SYSCONFDIR)/dbus-1/system.d
+UNITDIR     = /lib/systemd/system
 
 # Code files
 CODE_FILES  = nvidiaversion.py \
@@ -34,6 +35,7 @@ uninstall:
 install: install-sysconf $(CODE_FILES)
 	$(INSTALL) -m 755 tools/$(NAME).sh $(BINDIR)/$(NAME)
 	$(INSTALL) -m 644 conf/$(NAME).conf $(DBUS_DIR)/$(NAME).conf
+	$(INSTALL) -m 644 tools/$(NAME).service $(UNITDIR)/$(NAME).service
 
 mk-sysconfdir:
 	$(MKDIR) $(SYSCONFDIR)/$(NAME)

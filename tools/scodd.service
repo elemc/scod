@@ -1,0 +1,10 @@
+[Unit]
+Description=SCOD Daemon
+After=dbus.target
+
+[Service]
+Type=dbus
+ExecStart=/usr/bin/scodd
+
+[Install]
+WantedBy=multi-user.target
