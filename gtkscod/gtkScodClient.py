@@ -5,6 +5,8 @@ pygtk.require('2.0')
 import gtk
 from Detail import Detail
 
+
+##
 class gtkScodClient:
 	# Obligatory basic callback
 	def print_hello(self, w, data):
@@ -75,8 +77,6 @@ class gtkScodClient:
 		toolbar.set_style(gtk.TOOLBAR_BOTH)
 		toolbar.set_border_width(1)
 
-		#separator = gtk.HSeparator()
-
 		listDev = gtk.TextView()
 		listDev.set_tooltip_text('Detected Devices')
 		listDev.set_size_request(200, 150)
@@ -124,11 +124,9 @@ class gtkScodClient:
 		menubar = self.get_main_menu(window)
 
 		main_vbox.pack_start(menubar, False, True, 0)
-		#main_vbox.pack_start(separator, False, True, 0)
 		main_vbox.pack_start(toolbar, False, True, 0)
 		main_vbox.pack_start(vpaned, False, True, 0)
 		toolbar.show()
-		#separator.show()
 		menubar.show()
 		vpaned.show()
 		window.show()
