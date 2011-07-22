@@ -4,9 +4,8 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 from Detail import Detail
+from Image import *
 
-
-##
 class gtkScodClient:
 	# Obligatory basic callback
 	def print_hello(self, w, data):
@@ -65,16 +64,22 @@ class gtkScodClient:
 
 		toolbar = gtk.Toolbar()
 		#toolbar.prepend_item(text, tooltip_text, tooltip_private_text, icon, callback, user_data)
-		toolbar.append_item('Disable\nnotification', "Disable notification", '', None, None, user_data = None)
-		toolbar.append_item('Disable\nnotif for all', "Disable notif for all", '', None, None, user_data = None)
-		toolbar.append_item('Apply\nall actions', "Apply all actions", '', None, None, user_data = None)
-		toolbar.append_item('Delete\naction', "Delete action", '', None, None, user_data = None)
-		toolbar.append_item('Cancel\nactions', "Cancel actions", '', None, None, user_data = None)
+		toolbar.append_item('Disable\nnotification', "Disable notification", '', \
+							disable, None, user_data = None)
+		toolbar.append_item('Disable\nnotif for all', "Disable notif for all", '', \
+							disableall, None, user_data = None)
+		toolbar.append_item('Apply\nall actions', "Apply all actions", '', \
+							apply_, None, user_data = None)
+		toolbar.append_item('Delete\naction', "Delete action", '', \
+							deleteaction, None, user_data = None)
+		toolbar.append_item('Cancel\nactions', "Cancel actions", '', \
+							cancelaction, None, user_data = None)
 		#toolbar.append_space()
 		toolbar.prepend_space()
+		toolbar.set_icon_size(gtk.ICON_SIZE_SMALL_TOOLBAR)
 		#toolbar.insert_space(position)
 		toolbar.set_orientation(gtk.ORIENTATION_HORIZONTAL)
-		toolbar.set_style(gtk.TOOLBAR_BOTH)
+		toolbar.set_style(gtk.TOOLBAR_ICONS)
 		toolbar.set_border_width(1)
 
 		listDev = gtk.TextView()
@@ -103,7 +108,7 @@ class gtkScodClient:
 
 		text = gtk.TextView()
 		text.set_tooltip_text('Actions')
-		text.set_size_request(600, 150)
+		text.set_size_request(600, 250)
 
 		vpaned = gtk.VPaned()
 		vpaned.add1(hpaned)
@@ -114,7 +119,7 @@ class gtkScodClient:
 		window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 		window.connect("destroy", lambda w: gtk.main_quit())
 		window.set_title("GTK ScodClient")
-		window.set_size_request(600, 400)
+		window.set_size_request(600, 500)
 
 		main_vbox = gtk.VBox(False, 1)
 		main_vbox.set_border_width(1)
