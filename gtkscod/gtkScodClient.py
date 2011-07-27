@@ -5,6 +5,7 @@ pygtk.require('2.0')
 import gtk
 from Detail import Detail
 from Image import *
+from ListenThread import ListenThread
 
 class gtkScodClient:
 	# Obligatory basic callback
@@ -106,7 +107,7 @@ class gtkScodClient:
 		listDev.show()
 		detail.show()
 
-		text = gtk.TextView()
+		text = gtk.TreeView()
 		text.set_tooltip_text('Actions')
 		text.set_size_request(600, 250)
 
@@ -136,10 +137,13 @@ class gtkScodClient:
 		vpaned.show()
 		window.show()
 
+		self.listen_thread = ListenThread(self)
+
 def main():
 	gtk.main()
 	return 0
 
 if __name__ == "__main__":
-	gtkScodClient()
+	clnt = gtkScodClient()
+	clnt.listen_thread.start()
 	main()
