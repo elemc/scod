@@ -9,15 +9,16 @@ import dbus
 import gobject
 
 class ListenThread(Thread):
-	def __init__(self, parent_class):
+	def __init__(self, mainloop = None, parent_class = None):
 		Thread.__init__(self)
+		if mainloop is None :
+			self.main_loop = gobject.MainLoop()
+		else :
+			self.main_loop = mainloop
 		DBusGMainLoop(set_as_default = True)
 
-		#self.main_loop			= gobject.MainLoop()
-		dbus_loop = DBusGMainLoop()
-		#self.dbus_loop			= self.main_loop
 		self.mw					= parent_class
-		bus						= dbus.SystemBus(mainloop = dbus_loop)
+		bus						= dbus.SystemBus()
 		try:
 			self.scod			= bus.get_object('ru.russianfedora.SCOD', '/ru/russianfedora/SCOD')
 			self.iface_signal	= dbus.Interface(self.scod, dbus_interface='ru.russianfedora.SCOD')
@@ -38,12 +39,11 @@ class ListenThread(Thread):
 			return
 		self.iface_signal.connect_to_signal('new_device', self.new_device_handler)
 		self.iface_cmd.listDevices()
-		#QEventLoop().exec_()
-		#self.main_loop.run()
 		print 'thread start'
+		self.main_loop.run()
 	
 	def stop(self):
-		self.main_loop().exit()
+		self.main_loop.quit()
 
 	def disable_device_notif(self, dev_id):
 		dest = []
@@ -80,3 +80,13 @@ class ListenThread(Thread):
 		device_dict['current_driver']	= cur_drv
 
 		self.mw(device_dict)
+
+
+if __name__ == "__main__":
+	try :
+		main_loop = gobject.MainLoop()
+		trd = ListenThread(main_loop)
+		trd.start()
+	except KeyboardInterrupt :
+		print 'tread closed manually'
+		trd.stop()

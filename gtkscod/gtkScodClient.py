@@ -6,6 +6,7 @@ import gtk
 from Detail import Detail
 from Image import *
 from ListenThread import ListenThread
+#from Processing import WindowProcessing
 
 class gtkScodClient:
 	# Obligatory basic callback
@@ -35,12 +36,20 @@ class gtkScodClient:
 		# Finally, return the actual menu bar created by the item factory.
 		return item_factory.get_widget("<main>")
 
+	def _quit(self):
+		if 'listen_thread' in dir(self) :
+			self.listen_thread.stop()
+		gtk.main_quit()
+
+	def add_new_device(self, dev):
+		print dev
+
 	def __init__(self):
 		self.menu_items = (
 			( "/_File", \
 							None,			None,				0, "<Branch>" ),
 			( "/File/E_xit", \
-							"<control>Q",	gtk.main_quit,		0, None ),
+							"<control>Q",	self._quit,		0, None ),
 			( "/_Devices", \
 							None,			None,				0, "<Branch>" ),
 			( "/Devices/_Disable notification", \
@@ -118,7 +127,7 @@ class gtkScodClient:
 		text.show()
 
 		window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-		window.connect("destroy", lambda w: gtk.main_quit())
+		window.connect("destroy", lambda w: self._quit())
 		window.set_title("GTK ScodClient")
 		window.set_size_request(600, 500)
 
@@ -137,7 +146,7 @@ class gtkScodClient:
 		vpaned.show()
 		window.show()
 
-		self.listen_thread = ListenThread(self)
+		self.listen_thread = ListenThread(parent_class = self.add_new_device)
 
 def main():
 	gtk.main()
