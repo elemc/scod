@@ -1,78 +1,89 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import pygtk
 pygtk.require('2.0')
 import gtk
 from Image import *
 
-def addModule(mod, text):
-	mod.append_text(text)
+class Detail(gtk.VBox):
+	def __init__(self, p1, p2, parent = None):
+		gtk.VBox.__init__(self, p1, p2)
 
-def entryText(entry, text):
-	entry.set_text(text)
+		self.separator = gtk.HSeparator()
 
-def addNote(obj, text):
-	obj.set_text(text)
-	obj.show()
+		self.nameLabel = gtk.Label()
+		self.nameLabel.set_text('Name :')
+		self.nameLabel.set_justify(gtk.JUSTIFY_LEFT)
+		self.nameLabel.set_alignment(0.0, 0.0)
 
-separator = gtk.HSeparator()
+		self.entry = gtk.Entry(max = 0)
+		self.entry.set_editable(False)
+		self.entry.set_visibility(True)
 
-nameLabel = gtk.Label()
-nameLabel.set_text('Name :')
-nameLabel.set_justify(gtk.JUSTIFY_LEFT)
-nameLabel.set_alignment(0.0, 0.0)
-entry = gtk.Entry(max = 0)
-entry.set_editable(False)
-entry.set_visibility(True)
-selectModuleLabel = gtk.Label()
-selectModuleLabel.set_text('Select Module :')
-selectModuleLabel.set_justify(gtk.JUSTIFY_LEFT)
-selectModuleLabel.set_alignment(0.0, 0.0)
-modules = gtk.ComboBox()
-actionDeviceLabel = gtk.Label()
-actionDeviceLabel.set_text('Action Device :')
-actionDeviceLabel.set_justify(gtk.JUSTIFY_LEFT)
-actionDeviceLabel.set_alignment(0.0, 0.0)
-neededActionLabel = gtk.Label()
-neededActionLabel.set_text('For installing this module need :')
-neededActionLabel.set_justify(gtk.JUSTIFY_LEFT)
-neededActionLabel.set_alignment(0.0, 0.0)
-installPacksLabel = gtk.Label()
-installPacksLabel.set_text('Packages to install :')
-installPacksLabel.set_justify(gtk.JUSTIFY_LEFT)
-installPacksLabel.set_alignment(0.0, 0.0)
+		self.selectModuleLabel = gtk.Label()
+		self.selectModuleLabel.set_text('Select Module :')
+		self.selectModuleLabel.set_justify(gtk.JUSTIFY_LEFT)
+		self.selectModuleLabel.set_alignment(0.0, 0.0)
 
-reset = gtk.Button('Reset')
-reset.set_alignment(0.0, 0.0)
-reset.set_image(reset_)
-accept = gtk.Button('Accept')
-accept.set_alignment(1.0, 1.0)
-accept.set_image(accept_)
+		self.modules = gtk.ComboBox()
 
-hbox = gtk.HBox(False, 1)
-hbox.pack_start(reset, False, True, 0)
-hbox.pack_end(accept, False, True, 0)
-reset.show()
-accept.show()
+		self.actionDeviceLabel = gtk.Label()
+		self.actionDeviceLabel.set_text('Action Device :')
+		self.actionDeviceLabel.set_justify(gtk.JUSTIFY_LEFT)
+		self.actionDeviceLabel.set_alignment(0.0, 0.0)
 
-Detail = gtk.VBox(False, 1)
-Detail.set_border_width(1)
+		self.neededActionLabel = gtk.Label()
+		self.neededActionLabel.set_text('For installing this module need :')
+		self.neededActionLabel.set_justify(gtk.JUSTIFY_LEFT)
+		self.neededActionLabel.set_alignment(0.0, 0.0)
 
-Detail.pack_start(nameLabel, False, False, 0)
-Detail.pack_start(entry,  False, False, 0)
-Detail.pack_start(selectModuleLabel, False, False, 0)
-Detail.pack_start(modules, False, False, 0)
-Detail.pack_start(actionDeviceLabel, False, False, 0)
-Detail.pack_start(neededActionLabel, False, False, 0)
-Detail.pack_start(installPacksLabel, False, False, 0)
-Detail.pack_start(separator, False, True, 0)
-Detail.pack_start(hbox, False, True, 0)
-separator.show()
-actionDeviceLabel.show()
-neededActionLabel.show()
-installPacksLabel.show()
-selectModuleLabel.show()
-modules.show()
-entry.show()
-hbox.show()
-nameLabel.show()
+		self.installPacksLabel = gtk.Label()
+		self.installPacksLabel.set_text('Packages to install :')
+		self.installPacksLabel.set_justify(gtk.JUSTIFY_LEFT)
+		self.installPacksLabel.set_alignment(0.0, 0.0)
+
+		self.reset = gtk.Button('Reset')
+		self.reset.set_alignment(0.0, 0.0)
+		self.reset.set_image(reset_)
+		self.accept = gtk.Button('Accept')
+		self.accept.set_alignment(1.0, 1.0)
+		self.accept.set_image(accept_)
+
+		self.hbox = gtk.HBox(False, 1)
+		self.hbox.pack_start(self.reset, False, True, 0)
+		self.hbox.pack_end(self.accept, False, True, 0)
+		#self.reset.show()
+		#self.accept.show()
+
+		#self.Detail = gtk.VBox(False, 1)
+		self.set_border_width(1)
+
+		self.pack_start(self.nameLabel, False, False, 0)
+		self.pack_start(self.entry,  False, False, 0)
+		self.pack_start(self.selectModuleLabel, False, False, 0)
+		self.pack_start(self.modules, False, False, 0)
+		self.pack_start(self.actionDeviceLabel, False, False, 0)
+		self.pack_start(self.neededActionLabel, False, False, 0)
+		self.pack_start(self.installPacksLabel, False, False, 0)
+		self.pack_start(self.separator, False, True, 0)
+		self.pack_start(self.hbox, False, True, 0)
+		"""self.separator.show()
+		self.actionDeviceLabel.show()
+		self.neededActionLabel.show()
+		self.installPacksLabel.show()
+		self.selectModuleLabel.show()
+		self.modules.show()
+		self.entry.show()
+		self.hbox.show()
+		self.nameLabel.show()"""
+
+	def addModule(self, mod, text):
+		mod.append_text(text)
+
+	def entryText(self, entry, text):
+		entry.set_text(text)
+
+	def addNote(self, obj, text):
+		obj.set_text(text)
+		#obj.show()

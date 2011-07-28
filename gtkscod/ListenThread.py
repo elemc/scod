@@ -1,21 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from threading import Thread
-
 # dbus
 from dbus.mainloop.glib import DBusGMainLoop
 import dbus
 import gobject
 
-class ListenThread(Thread):
+class ListenThread():
 	def __init__(self, mainloop = None, parent_class = None):
-		Thread.__init__(self)
-		if mainloop is None :
-			self.main_loop = gobject.MainLoop()
-		else :
-			self.main_loop = mainloop
 		DBusGMainLoop(set_as_default = True)
+		if mainloop is None :
+			self.mainloop = gobject.MainLoop()
+		else :
+			self.mainloop = mainloop
 
 		self.mw					= parent_class
 		bus						= dbus.SystemBus()
@@ -40,10 +37,11 @@ class ListenThread(Thread):
 		self.iface_signal.connect_to_signal('new_device', self.new_device_handler)
 		self.iface_cmd.listDevices()
 		print 'thread start'
-		self.main_loop.run()
+		self.mainloop.run()
 	
 	def stop(self):
-		self.main_loop.quit()
+		self.mainloop.quit()
+		pass
 
 	def disable_device_notif(self, dev_id):
 		dest = []
@@ -81,12 +79,11 @@ class ListenThread(Thread):
 
 		self.mw(device_dict)
 
-
 if __name__ == "__main__":
 	try :
-		main_loop = gobject.MainLoop()
-		trd = ListenThread(main_loop)
-		trd.start()
+		mainloop = gobject.MainLoop()
+		trd = ListenThread(mainloop)
+		trd.run()
 	except KeyboardInterrupt :
 		print 'tread closed manually'
 		trd.stop()

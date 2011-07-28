@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import pygtk
 pygtk.require('2.0')
@@ -6,7 +7,7 @@ import gtk
 from Detail import Detail
 from Image import *
 from ListenThread import ListenThread
-#from Processing import WindowProcessing
+from Processing import WindowProcessing
 
 class gtkScodClient:
 	# Obligatory basic callback
@@ -15,41 +16,27 @@ class gtkScodClient:
 
 	def get_main_menu(self, window):
 		accel_group = gtk.AccelGroup()
-
-		# This function initializes the item factory.
-		# Param 1: The type of menu - can be MenuBar, Menu,
-		#		  or OptionMenu.
-		# Param 2: The path of the menu.
-		# Param 3: A reference to an AccelGroup. The item factory sets up
-		#		  the accelerator table while generating menus.
 		item_factory = gtk.ItemFactory(gtk.MenuBar, "<main>", accel_group)
-
-		# This method generates the menu items. Pass to the item factory
-		#  the list of menu items
 		item_factory.create_items(self.menu_items)
-
-		# Attach the new accelerator group to the window.
 		window.add_accel_group(accel_group)
-
-		# need to keep a reference to item_factory to prevent its destruction
 		self.item_factory = item_factory
-		# Finally, return the actual menu bar created by the item factory.
 		return item_factory.get_widget("<main>")
 
-	def _quit(self):
-		if 'listen_thread' in dir(self) :
-			self.listen_thread.stop()
-		gtk.main_quit()
+	def _quit(self, *args):
+		#print args
+		self.listen_thread.stop()
+		exit()
 
 	def add_new_device(self, dev):
 		print dev
+		self.w.entry.set_text(dev['name'])
 
 	def __init__(self):
 		self.menu_items = (
 			( "/_File", \
 							None,			None,				0, "<Branch>" ),
 			( "/File/E_xit", \
-							"<control>Q",	self._quit,		0, None ),
+							"<control>Q",	self._quit,			0, None ),
 			( "/_Devices", \
 							None,			None,				0, "<Branch>" ),
 			( "/Devices/_Disable notification", \
@@ -72,79 +59,80 @@ class gtkScodClient:
 							None,			None,				0, None ),
 			)
 
-		toolbar = gtk.Toolbar()
-		#toolbar.prepend_item(text, tooltip_text, tooltip_private_text, icon, callback, user_data)
-		toolbar.append_item('Disable\nnotification', "Disable notification", '', \
+		self.toolbar = gtk.Toolbar()
+		#self.toolbar.prepend_item(text, tooltip_text, tooltip_private_text, icon, callback, user_data)
+		self.toolbar.append_item('Disable\nnotification', "Disable notification", '', \
 							disable, None, user_data = None)
-		toolbar.append_item('Disable\nnotif for all', "Disable notif for all", '', \
+		self.toolbar.append_item('Disable\nnotif for all', "Disable notif for all", '', \
 							disableall, None, user_data = None)
-		toolbar.append_item('Apply\nall actions', "Apply all actions", '', \
+		self.toolbar.append_item('Apply\nall actions', "Apply all actions", '', \
 							apply_, None, user_data = None)
-		toolbar.append_item('Delete\naction', "Delete action", '', \
+		self.toolbar.append_item('Delete\naction', "Delete action", '', \
 							deleteaction, None, user_data = None)
-		toolbar.append_item('Cancel\nactions', "Cancel actions", '', \
+		self.toolbar.append_item('Cancel\nactions', "Cancel actions", '', \
 							cancelaction, None, user_data = None)
-		#toolbar.append_space()
-		toolbar.prepend_space()
-		toolbar.set_icon_size(gtk.ICON_SIZE_SMALL_TOOLBAR)
-		#toolbar.insert_space(position)
-		toolbar.set_orientation(gtk.ORIENTATION_HORIZONTAL)
-		toolbar.set_style(gtk.TOOLBAR_ICONS)
-		toolbar.set_border_width(1)
+		#self.toolbar.append_space()
+		self.toolbar.prepend_space()
+		self.toolbar.set_icon_size(gtk.ICON_SIZE_SMALL_TOOLBAR)
+		#self.toolbar.insert_space(position)
+		self.toolbar.set_orientation(gtk.ORIENTATION_HORIZONTAL)
+		self.toolbar.set_style(gtk.TOOLBAR_ICONS)
+		self.toolbar.set_border_width(1)
 
-		listDev = gtk.TextView()
-		listDev.set_tooltip_text('Detected Devices')
-		listDev.set_size_request(200, 150)
+		self.listDev = gtk.TreeView()
+		self.listDev.set_tooltip_text('Detected Devices')
+		self.listDev.set_size_request(200, 150)
 
-		scrollWindow = gtk.ScrolledWindow()
-		scrollWindow.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-		scrollWindow.add_with_viewport(Detail)
-		Detail.show()
+		self.scrollWindow = gtk.ScrolledWindow()
+		self.scrollWindow.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+		self.w = Detail(False, 1)
+		self.scrollWindow.add_with_viewport(self.w)
+		self.w.show_all()
 
-		#detail = gtk.VBox(False, 1)
-		detail = gtk.Frame()
-		detail.set_label('Modules')
-		detail.set_tooltip_text('Module details')
-		detail.set_border_width(1)
-		detail.add(scrollWindow)
-		scrollWindow.show()
+		#self.detail = gtk.VBox(False, 1)
+		self.detail = gtk.Frame()
+		self.detail.set_label('Modules')
+		self.detail.set_tooltip_text('Module details')
+		self.detail.set_border_width(1)
+		self.detail.add(self.scrollWindow)
+		self.scrollWindow.show()
 
-		hpaned = gtk.HPaned()
-		hpaned.add1(listDev)
-		hpaned.add2(detail)
-		hpaned.set_size_request(600, 300)
-		listDev.show()
-		detail.show()
+		self.hpaned = gtk.HPaned()
+		self.hpaned.add1(self.listDev)
+		self.hpaned.add2(self.detail)
+		self.hpaned.set_size_request(600, 300)
+		self.listDev.show()
+		self.detail.show()
 
-		text = gtk.TreeView()
-		text.set_tooltip_text('Actions')
-		text.set_size_request(600, 250)
+		self.text = gtk.TreeView()
+		self.text.set_tooltip_text('Actions')
+		self.text.set_size_request(600, 250)
 
-		vpaned = gtk.VPaned()
-		vpaned.add1(hpaned)
-		vpaned.add2(text)
-		hpaned.show()
-		text.show()
+		self.vpaned = gtk.VPaned()
+		self.vpaned.add1(self.hpaned)
+		self.vpaned.add2(self.text)
+		self.hpaned.show()
+		self.text.show()
 
-		window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-		window.connect("destroy", lambda w: self._quit())
-		window.set_title("GTK ScodClient")
-		window.set_size_request(600, 500)
+		self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+		self.window.connect("destroy", self._quit)
+		self.window.set_title("GTK ScodClient")
+		self.window.set_size_request(600, 500)
 
-		main_vbox = gtk.VBox(False, 1)
-		main_vbox.set_border_width(1)
-		window.add(main_vbox)
-		main_vbox.show()
+		self.main_vbox = gtk.VBox(False, 1)
+		self.main_vbox.set_border_width(1)
+		self.window.add(self.main_vbox)
+		self.main_vbox.show()
 
-		menubar = self.get_main_menu(window)
+		self.menubar = self.get_main_menu(self.window)
 
-		main_vbox.pack_start(menubar, False, True, 0)
-		main_vbox.pack_start(toolbar, False, True, 0)
-		main_vbox.pack_start(vpaned, False, True, 0)
-		toolbar.show()
-		menubar.show()
-		vpaned.show()
-		window.show()
+		self.main_vbox.pack_start(self.menubar, False, True, 0)
+		self.main_vbox.pack_start(self.toolbar, False, True, 0)
+		self.main_vbox.pack_start(self.vpaned, False, True, 0)
+		self.toolbar.show()
+		self.menubar.show()
+		self.vpaned.show()
+		self.window.show()
 
 		self.listen_thread = ListenThread(parent_class = self.add_new_device)
 
@@ -154,5 +142,5 @@ def main():
 
 if __name__ == "__main__":
 	clnt = gtkScodClient()
-	clnt.listen_thread.start()
+	clnt.listen_thread.run()
 	main()
