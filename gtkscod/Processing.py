@@ -17,14 +17,14 @@ class WindowProcessing():
 		self.Parent = parent
 		self.Detail = Detail(False, 1)
 		#self._init_menu()
-		#self._init_models()
 		self.lt = ListenThread(parent_class = self.add_new_device)
 		self._install_akmods = False
 		self._main_pko = None #PackageKitClient()
 		
 		# right frame
 		#self.comboBoxModules.currentIndexChanged.connect(self._handle_select_module)
-		#self.buttonBoxDetails.clicked.connect(self._handle_rbb)
+		self.Detail.reset.connect('clicked', self._handle_rbb, 'reset')
+		self.Detail.accept.connect('clicked', self._handle_rbb, 'accept')
 
 	def closeEvent(self, event):
 		event.ignore()
@@ -44,25 +44,33 @@ class WindowProcessing():
 			self.listViewActions.addAction(act)
 
 	def _init_models(self):
+		self.listView = self.Parent.listDev
 		self.model = DevicesListModel(self)
-		self.listView.setModel(self.model)
-		self.listView.selectionModel().currentChanged.connect(self._handle_select_item)
+		self.listView.set_model(self.model)
+		self.devSelection = self.listView.get_selection()
+		self.devSelection.set_mode(gtk.SELECTION_BROWSE)
+		#self.listView.selectionModel().currentChanged.connect(self._handle_select_item)
+		self.listView.connect("columns-changed", self._handle_data_changed_in_model)
 
+		self.listViewActions = self.Parent.listAct
 		self.act_model = ActionsModel(self)
-		self.listViewActions.setModel(self.act_model)
-		self.listViewActions.selectionModel().currentChanged.connect(self._handle_action_select_item)
+		self.listViewActions.set_model(self.act_model)
+		self.actSelection = self.listViewActions.get_selection()
+		self.actSelection.set_mode(gtk.SELECTION_BROWSE)
+		#self.listViewActions.selectionModel().currentChanged.connect(self._handle_action_select_item)
+		self.listViewActions.connect("columns-changed", self._handle_action_select_item)
 
-		self.act_model.actionDeleted.connect(self.model.reset_changes)
-		self.model.dataChanged.connect(self._handle_data_changed_in_model)
+		#self.act_model.actionDeleted.connect(self.model.reset_changes)
+		#self.model.dataChanged.connect(self._handle_data_changed_in_model)
 
 	def _init_pk(self):
 		if self._main_pko is None:
 			self._main_pko = PackageKitClient()
 
 	def add_new_device(self, dev):
-		print dev
+		#print dev
 		self.Detail.entry.set_text(dev['name'])
-		#self.model.add_new_device(dev)
+		self.model.add_new_device(dev)
 		self.show_notification()
 
 	def disen_device_notif(self, device_id, disable = False):
@@ -99,11 +107,11 @@ class WindowProcessing():
 	def _current_device(self, idx = None):
 		cur_idx = idx
 		if idx is None:
-			cur_idx = self.listView.selectionModel().currentIndex()
+			model, cur_idx = self.devSelection.get_selected()
 		return self.model.device_by_index(cur_idx)
 
 	def set_right_frame(self, idx):
-		self.comboBoxModules.clear()
+		self.Detail.modules.clear()
 		d = self._current_device(idx)
 		curdrv = QString()
 		if d.current_driver() is None or len(d.current_driver()) == 0:
@@ -253,13 +261,13 @@ class WindowProcessing():
 		self.set_right_frame(current_idx)
 		
 
-	def _handle_rbb(self, but):
-		cur_idx = self.listView.selectionModel().currentIndex()
-		if self.buttonBoxDetails.buttonRole(but) == QDialogButtonBox.ResetRole:
+	def _handle_rbb(self, widget, data = ''):
+		#(model, iter) = treeselection.get_selected()
+		model, cur_idx = self.devSelection.get_selected()
+		if data == 'reset' :
 			self.set_right_frame(cur_idx)
-		elif self.buttonBoxDetails.buttonRole(but) == QDialogButtonBox.ApplyRole:
+		elif data == 'accept' :
 			self._right_frame_apply(cur_idx)
-
 
 	def _handle_select_module(self, module_index):
 		if module_index == -1:

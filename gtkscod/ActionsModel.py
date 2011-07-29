@@ -8,9 +8,11 @@ from Image import image
 
 class ActionsModel(gtk.ListStore):
 	def __init__(self, parent = None):
-		gtk.ListStore.__init__(self)
+		gtk.ListStore.__init__(self, str)
 
-		self.set_column_types('gboolean', str)
+		self.Parent = parent
+
+		self.set_column_types(str)
 		self._load_imgs()
 		self.actions = [] # main data container
 
@@ -25,6 +27,10 @@ class ActionsModel(gtk.ListStore):
 		ad['type']	  = atype
 		ad['pkgs']	  = pkgs
 		self.actions.append(ad)
+		## выяснить результат действия по сигналу
 		#self.dataChanged.emit(self.index(len(self.actions)-1, 0),self.index(len(self.actions)-1, 0))
-		## выяснить назначение сигнала
-		self.append([state, act])
+		self.append([name])
+		#self.connect("columns-changed", self.Parent._handle_data_changed_in_model)
+
+	def del_action(self, *args):
+		pass

@@ -82,6 +82,15 @@ class gtkScodClient:
 		self.listDev.set_tooltip_text('Detected Devices')
 		self.listDev.set_size_request(200, 150)
 
+		self.tvcolumn = gtk.TreeViewColumn('Detected Devices')
+		self.listDev.append_column(self.tvcolumn)
+		self.cellpb = gtk.CellRendererPixbuf()
+		self.cell = gtk.CellRendererText()
+		self.tvcolumn.pack_start(self.cellpb, False)
+		self.tvcolumn.pack_start(self.cell, True)
+		self.tvcolumn.set_attributes(self.cellpb, stock_id=1)
+		self.tvcolumn.set_attributes(self.cell, text=0)
+
 		self.scrollWindow = gtk.ScrolledWindow()
 		self.scrollWindow.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		self.Detail = self.proc.Detail
@@ -98,13 +107,13 @@ class gtkScodClient:
 		self.hpaned.add2(self.detail)
 		self.hpaned.set_size_request(600, 300)
 
-		self.text = gtk.TreeView()
-		self.text.set_tooltip_text('Actions')
-		self.text.set_size_request(600, 250)
+		self.listAct = gtk.TreeView()
+		self.listAct.set_tooltip_text('Actions')
+		self.listAct.set_size_request(600, 250)
 
 		self.vpaned = gtk.VPaned()
 		self.vpaned.add1(self.hpaned)
-		self.vpaned.add2(self.text)
+		self.vpaned.add2(self.listAct)
 
 		self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 		self.window.connect("destroy", self._quit)
@@ -121,6 +130,7 @@ class gtkScodClient:
 		self.main_vbox.pack_start(self.toolbar, False, True, 0)
 		self.main_vbox.pack_start(self.vpaned, False, True, 0)
 
+		self.proc._init_models()
 		self.window.hide_all()
 
 if __name__ == "__main__" :
