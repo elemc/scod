@@ -10,6 +10,8 @@ class Detail(gtk.VBox):
 	def __init__(self, p1, p2, parent = None):
 		gtk.VBox.__init__(self, p1, p2)
 
+		self.set_border_width(1)
+
 		self.separator = gtk.HSeparator()
 
 		self.nameLabel = gtk.Label()
@@ -53,11 +55,6 @@ class Detail(gtk.VBox):
 		self.hbox = gtk.HBox(False, 1)
 		self.hbox.pack_start(self.reset, False, True, 0)
 		self.hbox.pack_end(self.accept, False, True, 0)
-		#self.reset.show()
-		#self.accept.show()
-
-		#self.Detail = gtk.VBox(False, 1)
-		self.set_border_width(1)
 
 		self.pack_start(self.nameLabel, False, False, 0)
 		self.pack_start(self.entry,  False, False, 0)
@@ -68,15 +65,6 @@ class Detail(gtk.VBox):
 		self.pack_start(self.installPacksLabel, False, False, 0)
 		self.pack_start(self.separator, False, True, 0)
 		self.pack_start(self.hbox, False, True, 0)
-		"""self.separator.show()
-		self.actionDeviceLabel.show()
-		self.neededActionLabel.show()
-		self.installPacksLabel.show()
-		self.selectModuleLabel.show()
-		self.modules.show()
-		self.entry.show()
-		self.hbox.show()
-		self.nameLabel.show()"""
 
 	def addModule(self, mod, text):
 		mod.append_text(text)
