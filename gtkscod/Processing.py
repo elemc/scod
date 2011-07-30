@@ -22,13 +22,9 @@ class WindowProcessing():
 		self._main_pko = None #PackageKitClient()
 		
 		# right frame
-		#self.comboBoxModules.currentIndexChanged.connect(self._handle_select_module)
+		self.Detail.modules.connect('changed', self._handle_select_module)
 		self.Detail.reset.connect('clicked', self._handle_rbb, 'reset')
 		self.Detail.accept.connect('clicked', self._handle_rbb, 'accept')
-
-	def closeEvent(self, event):
-		event.ignore()
-		self.hide()
 
 	def _init_menu(self):
 		self.actionFileExit.triggered.connect(self._handle_exit)
@@ -48,7 +44,7 @@ class WindowProcessing():
 		self.model = DevicesListModel(self)
 		self.listView.set_model(self.model)
 		self.devSelection = self.listView.get_selection()
-		self.devSelection.set_mode(gtk.SELECTION_BROWSE)
+		self.devSelection.set_mode(gtk.SELECTION_SINGLE)
 		#self.listView.selectionModel().currentChanged.connect(self._handle_select_item)
 		self.listView.connect("columns-changed", self._handle_data_changed_in_model)
 
@@ -56,7 +52,7 @@ class WindowProcessing():
 		self.act_model = ActionsModel(self)
 		self.listViewActions.set_model(self.act_model)
 		self.actSelection = self.listViewActions.get_selection()
-		self.actSelection.set_mode(gtk.SELECTION_BROWSE)
+		self.actSelection.set_mode(gtk.SELECTION_SINGLE)
 		#self.listViewActions.selectionModel().currentChanged.connect(self._handle_action_select_item)
 		self.listViewActions.connect("columns-changed", self._handle_action_select_item)
 
@@ -68,9 +64,16 @@ class WindowProcessing():
 			self._main_pko = PackageKitClient()
 
 	def add_new_device(self, dev):
-		#print dev
+		print dev
+		""" show device """
 		self.Detail.entry.set_text(dev['name'])
 		self.model.add_new_device(dev)
+		""" show modules """
+		moduleKeys = dev['modules'].iterkeys()
+		for module in moduleKeys :
+			self.Detail.modules.append_text(module)
+		# uncomment for define the first store as default
+		#self.Detail.modules.set_active(0)
 		self.show_notification()
 
 	def disen_device_notif(self, device_id, disable = False):
@@ -87,14 +90,22 @@ class WindowProcessing():
 
 	def _right_frame_apply(self, idx):
 		d = self.model.device_by_index(idx)
-		sel_cb_idx = self.comboBoxModules.currentIndex()
-		sel_module = str(self.comboBoxModules.itemData(sel_cb_idx).toString())
-		if sel_module == d.current_driver():
+		sel_cb_idx = self.Detail.modules.get_active_iter()
+		if sel_cb_idx is None :
+			print 'module not selected'
+			return
+		sel_module = str(self.Detail.modulesMod.get_value(sel_cb_idx, 0))
+		if d is None : 
+			print 'device not selected'
+			return
+		elif sel_module == d.current_driver() :
+			print 'Driver is current'
 			return
 		
 		self.act_model.remove_actions_by_devid(d.device_id(), sel_module)
 		pkgsi = d.packages_to_install(sel_module)
 		pkgsr = d.packages_to_remove(sel_module)
+		print pkgsi, '<install||remove>', pkgsr
 		if len(pkgsi) > 0:
 			self.act_model.add_new_action(d.device_id(), 
 							  sel_module, pkgsi, 0)
@@ -107,8 +118,11 @@ class WindowProcessing():
 	def _current_device(self, idx = None):
 		cur_idx = idx
 		if idx is None:
-			model, cur_idx = self.devSelection.get_selected()
-		return self.model.device_by_index(cur_idx)
+			model, cur_idx = self.devSelection.get_selected_rows()
+			if cur_idx == [] :
+				print 'Device Not Selected'
+				return
+		return self.model.device_by_index(cur_idx[0][0])
 
 	def set_right_frame(self, idx):
 		self.Detail.modules.clear()
@@ -118,7 +132,7 @@ class WindowProcessing():
 			curdrv = self.tr('Not installed')
 		else:
 			curdrv = QString('- %s -' % d.current_driver())
-		self.comboBoxModules.addItem(curdrv, QString(d.current_driver()))
+		self.self.Detail.modules.addItem(curdrv, QString(d.current_driver()))
 
 		self.lineEditName.setText(d.device_name())
 		our_sel_idx = -1
@@ -128,13 +142,13 @@ class WindowProcessing():
 				continue
 			elif m == d.selected_driver():
 				devmod = QString('* %s *' % m)
-				our_sel_idx = self.comboBoxModules.count()
+				our_sel_idx = self.self.Detail.modules.count()
 			else:
 				devmod = QString('%s' % m)
-			self.comboBoxModules.addItem(devmod, QString(m))
+			self.self.Detail.modules.addItem(devmod, QString(m))
 
 		if our_sel_idx != -1:
-			self.comboBoxModules.setCurrentIndex(our_sel_idx)
+			self.self.Detail.modules.setCurrentIndex(our_sel_idx)
 
 	def _do_resolve_packages(self, pkgs, to_remove = False):
 		if len(pkgs) == 0:
@@ -263,33 +277,43 @@ class WindowProcessing():
 
 	def _handle_rbb(self, widget, data = ''):
 		#(model, iter) = treeselection.get_selected()
-		model, cur_idx = self.devSelection.get_selected()
-		if data == 'reset' :
-			self.set_right_frame(cur_idx)
-		elif data == 'accept' :
-			self._right_frame_apply(cur_idx)
-
-	def _handle_select_module(self, module_index):
-		if module_index == -1:
-			self.labelDetails.setText('')
+		model, cur_idx = self.devSelection.get_selected_rows()
+		#print cur_idx
+		if cur_idx == [] :
+			print 'Device Not selected'
 			return
-		selection_module_name = str(self.comboBoxModules.itemData(module_index).toString())
+		if data == 'reset' :
+			self.set_right_frame(cur_idx[0][0])
+		elif data == 'accept' :
+			self._right_frame_apply(cur_idx[0][0])
+
+	def _handle_select_module(self, *args):
+		module_iter = self.Detail.modules.get_active_iter()
+		if module_iter is None :
+			self.Detail.installPacksLabel.set_text('')
+			return
+		selection_module_name = str(self.Detail.modulesMod.get_value(module_iter, 0))
+		#print selection_module_name, '-'
 		d = self._current_device()
+		if d is None :
+			print 'Device not selected'
+			return
+		print 'Selected : ', d.device_name()
 		pkgsi = d.packages_to_install(selection_module_name)
 		pkgsr = d.packages_to_remove(selection_module_name)
-		detail_html = QString('<h4>%1 </h4>').arg(self.tr('For installing this module need:'))
+		detail_html = '<b>For installing this module need:</b>\n'
 		if len(pkgsi) > 0:
-			detail_html += QString('<p>%1 <ul>').arg(self.tr('Packages to install:'))
+			detail_html += '\t<i><u>Packages to install:</u></i>\n'
 			for p in pkgsi:
-				detail_html += QString('<li>%1</li>').arg(p)
-			detail_html += QString('</ul></p>')
+				detail_html += '\t\t' + str(p) + '\n'
+			detail_html += '\n'
 		if len(pkgsr) > 0:
-			detail_html += QString('<p>%1 <ul>').arg(self.tr('Packages to remove: '))
+			detail_html += '\t<i><u>Packages to remove:</u></i>\n'
 			for p in pkgsr:
-				detail_html += QString('<li>%1</li>').arg(p)
-			detail_html += QString('</ul></p>')
+				detail_html += '\t\t' + str(p) + '\n'
+			detail_html += '\n'
 
-		self.labelDetails.setText(detail_html)
+		self.Detail.installPacksLabel.set_markup(detail_html)
 
 	def _handle_apply_actions(self, *args):
 		print args

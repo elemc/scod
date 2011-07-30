@@ -28,7 +28,11 @@ class Detail(gtk.VBox):
 		self.selectModuleLabel.set_justify(gtk.JUSTIFY_LEFT)
 		self.selectModuleLabel.set_alignment(0.0, 0.0)
 
-		self.modules = gtk.ComboBox()
+		self.modulesMod = gtk.ListStore(str)
+		self.modules = gtk.ComboBox(self.modulesMod)
+		cell = gtk.CellRendererText()
+		self.modules.pack_start(cell, True)
+		self.modules.add_attribute(cell, 'text', 0)
 
 		self.actionDeviceLabel = gtk.Label()
 		self.actionDeviceLabel.set_text('Action Device :')
@@ -36,7 +40,7 @@ class Detail(gtk.VBox):
 		self.actionDeviceLabel.set_alignment(0.0, 0.0)
 
 		self.neededActionLabel = gtk.Label()
-		self.neededActionLabel.set_text('For installing this module need :')
+		#self.neededActionLabel.set_text('For installing this module need :')
 		self.neededActionLabel.set_justify(gtk.JUSTIFY_LEFT)
 		self.neededActionLabel.set_alignment(0.0, 0.0)
 
