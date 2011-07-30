@@ -4,7 +4,6 @@
 import pygtk
 pygtk.require('2.0')
 import gtk
-from Image import image
 from Device import Device
 
 class DevicesListModel(gtk.ListStore):

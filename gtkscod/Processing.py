@@ -46,15 +46,24 @@ class WindowProcessing():
 		self.devSelection = self.listView.get_selection()
 		self.devSelection.set_mode(gtk.SELECTION_SINGLE)
 		#self.listView.selectionModel().currentChanged.connect(self._handle_select_item)
-		self.listView.connect("columns-changed", self._handle_data_changed_in_model)
+		#self.listView.connect("columns-changed", self._handle_data_changed_in_model)
 
 		self.listViewActions = self.Parent.listAct
 		self.act_model = ActionsModel(self)
 		self.listViewActions.set_model(self.act_model)
 		self.actSelection = self.listViewActions.get_selection()
 		self.actSelection.set_mode(gtk.SELECTION_SINGLE)
+
+		self.tvcolumn = gtk.TreeViewColumn('Actions ')
+		self.listViewActions.append_column(self.tvcolumn)
+		self.cellpb = gtk.CellRendererPixbuf()
+		self.cell = gtk.CellRendererText()
+		self.tvcolumn.pack_start(self.cellpb, False)
+		self.tvcolumn.pack_start(self.cell, True)
+		self.tvcolumn.set_attributes(self.cellpb, stock_id=1)
+		self.tvcolumn.set_attributes(self.cell, text=0)
 		#self.listViewActions.selectionModel().currentChanged.connect(self._handle_action_select_item)
-		self.listViewActions.connect("columns-changed", self._handle_action_select_item)
+		#self.listViewActions.connect("columns-changed", self._handle_action_select_item)
 
 		#self.act_model.actionDeleted.connect(self.model.reset_changes)
 		#self.model.dataChanged.connect(self._handle_data_changed_in_model)
@@ -101,7 +110,7 @@ class WindowProcessing():
 		elif sel_module == d.current_driver() :
 			print 'Driver is current'
 			return
-		
+
 		self.act_model.remove_actions_by_devid(d.device_id(), sel_module)
 		pkgsi = d.packages_to_install(sel_module)
 		pkgsr = d.packages_to_remove(sel_module)
@@ -118,37 +127,45 @@ class WindowProcessing():
 	def _current_device(self, idx = None):
 		cur_idx = idx
 		if idx is None:
-			model, cur_idx = self.devSelection.get_selected_rows()
-			if cur_idx == [] :
+			model, cur_idx_ = self.devSelection.get_selected_rows()
+			if cur_idx_ == [] :
 				print 'Device Not Selected'
 				return
-		return self.model.device_by_index(cur_idx[0][0])
+			else :
+				cur_idx = cur_idx_[0][0]
+		return self.model.device_by_index(cur_idx)
 
 	def set_right_frame(self, idx):
-		self.Detail.modules.clear()
+		self.Detail.modulesMod.clear()
 		d = self._current_device(idx)
-		curdrv = QString()
+		"""print d.device_name(), ':', d.current_driver(), ':', \
+			  d.device_modules(),':', d.selected_driver(),\
+			  ':', len(self.Detail.modules)"""
+		curdrv = ''
 		if d.current_driver() is None or len(d.current_driver()) == 0:
-			curdrv = self.tr('Not installed')
+			curdrv = 'Not installed'
 		else:
-			curdrv = QString('- %s -' % d.current_driver())
-		self.self.Detail.modules.addItem(curdrv, QString(d.current_driver()))
+			curdrv = '- %s -' % d.current_driver()
+		#print curdrv, 'cur'
+		self.Detail.modules.append_text(curdrv)
 
-		self.lineEditName.setText(d.device_name())
+		self.Detail.entry.set_text(d.device_name())
 		our_sel_idx = -1
 		for m in d.device_modules():
-			devmod = QString()
+			devmod = ''
 			if m == d.current_driver():
 				continue
 			elif m == d.selected_driver():
-				devmod = QString('* %s *' % m)
-				our_sel_idx = self.self.Detail.modules.count()
+				devmod = '* %s *' % m
+				our_sel_idx = len(self.Detail.modules)
+				#print our_sel_idx, 'our'
 			else:
-				devmod = QString('%s' % m)
-			self.self.Detail.modules.addItem(devmod, QString(m))
+				devmod = '%s' % m
+			#print devmod, 'dev'
+			self.Detail.modules.append_text(devmod)
 
 		if our_sel_idx != -1:
-			self.self.Detail.modules.setCurrentIndex(our_sel_idx)
+			self.Detail.modules.set_active(our_sel_idx)
 
 	def _do_resolve_packages(self, pkgs, to_remove = False):
 		if len(pkgs) == 0:
