@@ -16,28 +16,14 @@ class WindowProcessing():
 	def __init__(self, parent = None):
 		self.Parent = parent
 		self.Detail = Detail(False, 1)
-		#self._init_menu()
 		self.lt = ListenThread(parent_class = self.add_new_device)
 		self._install_akmods = False
-		self._main_pko = None #PackageKitClient()
+		self._main_pko = None		#PackageKitClient()
 		
 		# right frame
 		self.Detail.modules.connect('changed', self._handle_select_module)
 		self.Detail.reset.connect('clicked', self._handle_rbb, 'reset')
 		self.Detail.accept.connect('clicked', self._handle_rbb, 'accept')
-
-	def _init_menu(self):
-		self.actionFileExit.triggered.connect(self._handle_exit)
-		
-		self.listView.setContextMenuPolicy(Qt.ActionsContextMenu)
-		self.listViewActions.setContextMenuPolicy(Qt.ActionsContextMenu)
-
-		# context menu for listView
-		for act in self.menuDevices.actions():
-			self.listView.addAction(act)
-		# context menu for listViewActions
-		for act in self.menuActions.actions():
-			self.listViewActions.addAction(act)
 
 	def _init_models(self):
 		self.listView = self.Parent.listDev
@@ -45,8 +31,6 @@ class WindowProcessing():
 		self.listView.set_model(self.model)
 		self.devSelection = self.listView.get_selection()
 		self.devSelection.set_mode(gtk.SELECTION_SINGLE)
-		#self.listView.selectionModel().currentChanged.connect(self._handle_select_item)
-		#self.listView.connect("columns-changed", self._handle_data_changed_in_model)
 
 		self.listViewActions = self.Parent.listAct
 		self.act_model = ActionsModel(self)
@@ -62,11 +46,6 @@ class WindowProcessing():
 		self.tvcolumn.pack_start(self.cell, True)
 		self.tvcolumn.set_attributes(self.cellpb, stock_id=1)
 		self.tvcolumn.set_attributes(self.cell, text=0)
-		#self.listViewActions.selectionModel().currentChanged.connect(self._handle_action_select_item)
-		#self.listViewActions.connect("columns-changed", self._handle_action_select_item)
-
-		#self.act_model.actionDeleted.connect(self.model.reset_changes)
-		#self.model.dataChanged.connect(self._handle_data_changed_in_model)
 
 	def _init_pk(self):
 		if self._main_pko is None:
@@ -127,12 +106,12 @@ class WindowProcessing():
 	def _current_device(self, idx = None):
 		cur_idx = idx
 		if idx is None:
-			model, cur_idx_ = self.devSelection.get_selected_rows()
-			if cur_idx_ == [] :
+			model, curr_iter = self.devSelection.get_selected()
+			if curr_iter is None :
 				print 'Device Not Selected'
 				return
 			else :
-				cur_idx = cur_idx_[0][0]
+				cur_idx = self.model.curr_row(curr_iter)
 		return self.model.device_by_index(cur_idx)
 
 	def set_right_frame(self, idx):
@@ -232,13 +211,20 @@ class WindowProcessing():
 		
 		print "Packages to remove:"
 		self._debug_print_pkg_ids(pkg_ids_remove)
-		res = QMessageBox.question(self, 
-				   self.tr("Operations done"), 
-				   self.tr("All operations applied. You may reboot a system. Reboot now?"),
-				   QMessageBox.Yes and QMessageBox.No, QMessageBox.Yes)
-		if res == QMessageBox.Yes:
-			print 'rebooting'
-					   
+		dialog = gtk.Dialog(title = "Operations done", \
+							parent = self.Parent.window, \
+							flags = gtk.DIALOG_MODAL, \
+							buttons = None)
+		label = gtk.Label('All operations applied. You may reboot a system. Reboot now?')
+		dialog.vbox.pack_start(label, True, True, 0)
+		buttonOk = gtk.Button(stock = gtk.STOCK_OK)
+		dialog.action_area.pack_start(buttonOk, True, True, 0)
+		buttonNo = gtk.Button(stock = gtk.STOCK_NO)
+		dialog.action_area.pack_start(buttonNo, True, True, 0)
+		buttonOk.connect('clicked', self.result, True, dialog, 'reboot')
+		buttonNo.connect('clicked', self.result, False, dialog, 'reboot')
+		dialog.show_all()
+
 	# slots
 	def _handle_data_changed_in_model(self, begin_idx, end_idx):
 		cur_idx = self.listView.selectionModel().currentIndex()
@@ -253,26 +239,24 @@ class WindowProcessing():
 
 	def _handle_remove_current_action(self, *args):
 		print args
-		#cur_idx = self.listViewActions.selectionModel().currentIndex()
-		#self.act_model.removeRows(cur_idx.row(), 1)
+		model, cur_idx = self.actSelection.get_selected()
+		self.act_model.removeCurrAct(cur_idx)
 
 	def _handle_clean_actions(self, *args):
 		print args
-		#self.act_model.clearRows()
+		self.act_model.clearRows()
 
 	def _handle_disable_all(self, *args):
 		print args
-		#devs = self.model.disable_all_devices()
-		#self.disen_device_notif(devs, True)
+		devs = self.model.disable_all_devices()
+		self.disen_device_notif(devs, True)
 
 	def _handle_disable_device(self, *args):
 		print args
-		#cur_idx = self.listView.selectionModel().currentIndex()
-		#this_is_hide_item = self.model.index_is_hide(cur_idx)
-		#need_id = self.model.index_hide(cur_idx, not this_is_hide_item)
-		#self._handle_select_item(cur_idx, cur_idx)
-		
-		#self.disen_device_notif(need_id, not this_is_hide_item)
+		model, cur_idx = self.devSelection.get_selected()
+		need_id, res = self.model.disable_one_device(cur_idx)
+		#print self.devSelection.get_selected_rows()
+		self.disen_device_notif(need_id, not res)
 
 	def _handle_exit(self):
 		self.hide_all()
@@ -293,16 +277,14 @@ class WindowProcessing():
 		
 
 	def _handle_rbb(self, widget, data = ''):
-		#(model, iter) = treeselection.get_selected()
-		model, cur_idx = self.devSelection.get_selected_rows()
-		#print cur_idx
-		if cur_idx == [] :
+		model, curr_iter = self.devSelection.get_selected()
+		if curr_iter is None :
 			print 'Device Not selected'
 			return
 		if data == 'reset' :
-			self.set_right_frame(cur_idx[0][0])
+			self.set_right_frame(self.model.curr_row(curr_iter))
 		elif data == 'accept' :
-			self._right_frame_apply(cur_idx[0][0])
+			self._right_frame_apply(self.model.curr_row(curr_iter))
 
 	def _handle_select_module(self, *args):
 		module_iter = self.Detail.modules.get_active_iter()
@@ -334,14 +316,28 @@ class WindowProcessing():
 
 	def _handle_apply_actions(self, *args):
 		print args
-		"""if self.act_model.pkgs_to_install_exist():
-			result = QMessageBox.question(self, self.tr('Install akmods too'), 
-						  self.tr('Do you have install also akmod (automated kernel module) packages too?'),
-						  QMessageBox.Yes and QMessageBox.No, QMessageBox.Yes)
-			if result == QMessageBox.Yes:
-				self._install_akmods = True
-		
-		self.setEnabled(False)
-		self._do_act()
-		self.setEnabled(True)"""
+		if self.act_model.pkgs_to_install_exist() or True:
+			dialog = gtk.Dialog(title = 'Install akmods too', \
+							parent = self.Parent.window, \
+							flags = gtk.DIALOG_MODAL, \
+							buttons = None)
+			label = gtk.Label('Do you have install also akmod (automated kernel module) packages too?')
+			dialog.vbox.pack_start(label, True, True, 0)
+			buttonOk = gtk.Button(stock = gtk.STOCK_OK)
+			dialog.action_area.pack_start(buttonOk, True, True, 0)
+			buttonNo = gtk.Button(stock = gtk.STOCK_NO)
+			dialog.action_area.pack_start(buttonNo, True, True, 0)
+			buttonOk.connect('clicked', self.result, True, dialog, 'act')
+			buttonNo.connect('clicked', self.result, False, dialog, 'act')
+			dialog.show_all()
+
+	def result(self, widget, answ, dialog, mark):
+		dialog.hide_all()
+		if answ :
+			if mark == 'act' :
+				self.Parent.window.set_sensitive(False)
+				self._do_act()
+				self.Parent.window.set_sensitive(True)
+			elif mark == 'reboot' :
+				print 'rebooting'
 

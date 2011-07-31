@@ -49,12 +49,12 @@ class Detail(gtk.VBox):
 		self.installPacksLabel.set_justify(gtk.JUSTIFY_LEFT)
 		self.installPacksLabel.set_alignment(0.0, 0.0)
 
-		self.reset = gtk.Button('Reset')
+		self.reset = gtk.Button('Reset', gtk.STOCK_REFRESH)
 		self.reset.set_alignment(0.0, 0.0)
-		self.reset.set_image(reset_)
-		self.accept = gtk.Button('Accept')
+		self.reset.set_tooltip_text('Reset')
+		self.accept = gtk.Button('Accept', gtk.STOCK_APPLY)
 		self.accept.set_alignment(1.0, 1.0)
-		self.accept.set_image(accept_)
+		self.accept.set_tooltip_text('Accept')
 
 		self.hbox = gtk.HBox(False, 1)
 		self.hbox.pack_start(self.reset, False, True, 0)

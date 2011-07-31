@@ -34,24 +34,16 @@ class ActionsModel(gtk.ListStore):
 		return res
 
 	# commons
-	def removeRows(self, row, count, parent):
-		last = row + count - 1
-		self.beginRemoveRows(parent, row, last)
-		remove_items = []
-		remove_range = range(row, last)
-		if count == 1:
-			remove_range = [row]
-		for a in self.actions:
-			if self.actions.index(a) in remove_range:
-				remove_items.append(a)
-		for ra in remove_items:
-			self.actions.remove(ra)
-			self.actionDeleted.emit(ra['devid'])
-		self.endRemoveRows()
+	def removeCurrAct(self, idx):
+		value = self.get_value(idx, 0)
+		self.remove(idx)
+		for act in self.actions :
+			if self._view_name(act) == value :
+				self.actions.remove(act)
+				break
 
 	def clearRows(self):
-		for act in self.actions:
-			self.actionDeleted.emit(act['devid'])
+		self.clear()
 		self.actions = []
 
 	def remove_actions_by_devid(self, sel_dev_id, module_name):
