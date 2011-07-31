@@ -316,7 +316,7 @@ class WindowProcessing():
 
 	def _handle_apply_actions(self, *args):
 		print args
-		if self.act_model.pkgs_to_install_exist() or True:
+		if self.act_model.pkgs_to_install_exist() :
 			dialog = gtk.Dialog(title = 'Install akmods too', \
 							parent = self.Parent.window, \
 							flags = gtk.DIALOG_MODAL, \
