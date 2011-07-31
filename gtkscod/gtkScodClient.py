@@ -42,8 +42,7 @@ class gtkScodClient:
 			( "/_Actions", \
 							None,			None,			5,	"<Branch>" ),
 			( "/Actions/on _Disable notif", \
-							None,			self.proc._handle_remove_current_action, \
-															6,	None ),
+							None,			None,			6,	None ),
 			( "/Actions/_Apply all actions", \
 							None,			self.proc._handle_apply_actions, \
 															7,	None ),

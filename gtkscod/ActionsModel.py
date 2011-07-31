@@ -35,6 +35,7 @@ class ActionsModel(gtk.ListStore):
 
 	# commons
 	def removeCurrAct(self, idx):
+		if idx is None : return
 		value = self.get_value(idx, 0)
 		self.remove(idx)
 		for act in self.actions :
