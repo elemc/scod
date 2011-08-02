@@ -19,8 +19,9 @@ class gtkScodClient:
 
 	def _quit(self, *args):
 		#print args
-		self.proc.lt.stop()
-		exit()
+		#self.proc.lt.stop()		## uncomment for 
+		#exit()						## application exit
+		self.window.hide_all()
 
 	def __init__(self):
 
@@ -33,12 +34,15 @@ class gtkScodClient:
 							"<control>Q",	self._quit,		1,	None ),
 			( "/_Devices", \
 							None,			None,			2,	"<Branch>" ),
-			( "/Devices/_Disable notification", \
+			( "/Devices/Enable or _Disable\nnotification", \
 							None,			self.proc._handle_disable_device, \
 															3,	None ),
 			( "/Devices/Disable notif for _all", \
 							None,			self.proc._handle_disable_all, \
 															4,	None ),
+			( "/Devices/_Enable notif for all", \
+							None,			self.proc._handle_enable_all, \
+															12,	None ),
 			( "/_Actions", \
 							None,			None,			5,	"<Branch>" ),
 			( "/Actions/on _Disable notif", \
@@ -59,10 +63,12 @@ class gtkScodClient:
 
 		self.toolbar = gtk.Toolbar()
 		#self.toolbar.prepend_item(text, tooltip_text, tooltip_private_text, icon, callback, user_data)
-		self.toolbar.append_item('Disable\nnotification', "Disable notification", '', \
+		self.toolbar.append_item('Disable\nnotification', "Enable\Disable notification", '', \
 							disable, self.proc._handle_disable_device, user_data = 'curr_Notif')
 		self.toolbar.append_item('Disable\nnotif for all', "Disable notif for all", '', \
 							disableall, self.proc._handle_disable_all, user_data = 'all_Notif')
+		self.toolbar.append_item('Enable\nnotif for all', "Enable notif for all", '', \
+							enableall, self.proc._handle_enable_all, user_data = 'all_Notif_on')
 		self.toolbar.append_item('Apply\nall actions', "Apply all actions", '', \
 							apply_, self.proc._handle_apply_actions, user_data = 'all_apply')
 		self.toolbar.append_item('Delete\naction', "Delete action", '', \

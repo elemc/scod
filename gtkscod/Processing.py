@@ -31,12 +31,15 @@ class WindowProcessing():
 		self.listView.set_model(self.model)
 		self.devSelection = self.listView.get_selection()
 		self.devSelection.set_mode(gtk.SELECTION_SINGLE)
+		#self.listView.set_property("hover-selection", True)
+		self.listView.connect('cursor-changed', self._select_device_for_processing)
 
 		self.listViewActions = self.Parent.listAct
 		self.act_model = ActionsModel(self)
 		self.listViewActions.set_model(self.act_model)
 		self.actSelection = self.listViewActions.get_selection()
 		self.actSelection.set_mode(gtk.SELECTION_SINGLE)
+		#self.listViewActions.set_property("hover-selection", True)
 
 		self.tvcolumn = gtk.TreeViewColumn('Actions ')
 		self.listViewActions.append_column(self.tvcolumn)
@@ -53,16 +56,24 @@ class WindowProcessing():
 
 	def add_new_device(self, dev):
 		print dev
-		""" show device """
-		self.Detail.entry.set_text(dev['name'])
+		if not self.model.unicalDev(dev) :
+			return
 		self.model.add_new_device(dev)
+		self.show_notification()
+
+	def _select_device_for_processing(self, widget):
+		model,row_ = self.devSelection.get_selected_rows()
+		row = row_[0][0]
+		dev = self.model.device_by_index(row)
+		""" show device """
+		self.Detail.entry.set_text(dev.device_name())
 		""" show modules """
-		moduleKeys = dev['modules'].iterkeys()
+		self.Detail.modulesMod.clear()
+		moduleKeys = dev.device_modules()
 		for module in moduleKeys :
 			self.Detail.modules.append_text(module)
 		# uncomment for define the first store as default
-		#self.Detail.modules.set_active(0)
-		self.show_notification()
+		# self.Detail.modules.set_active(0)
 
 	def disen_device_notif(self, device_id, disable = False):
 		if disable:
@@ -77,7 +88,7 @@ class WindowProcessing():
 		self.lt.run()
 
 	def _right_frame_apply(self, idx):
-		d = self.model.device_by_index(idx)
+		d = self.model.device_by_index(idx[0][0])
 		sel_cb_idx = self.Detail.modules.get_active_iter()
 		if sel_cb_idx is None :
 			print 'module not selected'
@@ -105,14 +116,14 @@ class WindowProcessing():
 	
 	def _current_device(self, idx = None):
 		cur_idx = idx
-		if idx is None:
-			model, curr_iter = self.devSelection.get_selected()
-			if curr_iter is None :
+		if cur_idx is None or len(cur_idx) < 1 :
+			model, cur_idx_ = self.devSelection.get_selected_rows()
+			if len(cur_idx_) < 1 :
 				print 'Device Not Selected'
 				return
 			else :
-				cur_idx = self.model.curr_row(curr_iter)
-		return self.model.device_by_index(cur_idx)
+				cur_idx = cur_idx_
+		return self.model.device_by_index(cur_idx[0][0])
 
 	def set_right_frame(self, idx):
 		self.Detail.modulesMod.clear()
@@ -251,6 +262,11 @@ class WindowProcessing():
 		devs = self.model.disable_all_devices()
 		self.disen_device_notif(devs, True)
 
+	def _handle_enable_all(self, *args):
+		print args
+		devs = self.model.enable_all_devices()
+		#self.disen_device_notif(devs)
+
 	def _handle_disable_device(self, *args):
 		print args
 		model, cur_idx = self.devSelection.get_selected()
@@ -277,14 +293,15 @@ class WindowProcessing():
 		
 
 	def _handle_rbb(self, widget, data = ''):
-		model, curr_iter = self.devSelection.get_selected()
-		if curr_iter is None :
+		model, cur_idx = self.devSelection.get_selected_rows()
+		print cur_idx
+		if len(cur_idx) < 1 :
 			print 'Device Not selected'
 			return
 		if data == 'reset' :
-			self.set_right_frame(self.model.curr_row(curr_iter))
+			self.set_right_frame(cur_idx)
 		elif data == 'accept' :
-			self._right_frame_apply(self.model.curr_row(curr_iter))
+			self._right_frame_apply(cur_idx)
 
 	def _handle_select_module(self, *args):
 		module_iter = self.Detail.modules.get_active_iter()

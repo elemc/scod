@@ -10,8 +10,19 @@ class DevicesListModel(gtk.ListStore):
 	def __init__(self, parent = None):
 		gtk.ListStore.__init__(self, str)
 
+		self.Parent = parent
 		self.set_column_types(str, str)
 		self.data_list = []
+
+	def unicalDev(self, dev):
+		unicality = True
+		d = Device(dev)
+		for device in self.data_list :
+			if d.device_name() == device.device_name() and \
+			   d.device_type() == device.device_type() :
+				unicality = False
+				break
+		return unicality
 
 	def add_new_device(self, dev):
 		d = Device(dev)
@@ -36,6 +47,21 @@ class DevicesListModel(gtk.ListStore):
 			curr_iter = self.iter_next(curr_iter)
 		return ret_devs
 
+	def enable_all_devices(self):
+		ret_devs = []
+		for d in self.data_list:
+			d.set_hide(False)
+			ret_devs.append(d.device_id())
+		curr_iter = self.get_iter_first()
+		while curr_iter is not None :
+			if curr_iter is None : return None, None
+			value_ = self.get_value(curr_iter, 0)
+			if value_.endswith("\t(disable notification)") :
+				value = value_[:-23]
+				self.set_value(curr_iter, 0, value)
+			curr_iter = self.iter_next(curr_iter)
+		return ret_devs
+
 	def disable_one_device(self, cur_idx = None, disableAll = False):
 		if cur_idx is None : return None, None
 		value_ = self.get_value(cur_idx, 0)
@@ -48,15 +74,6 @@ class DevicesListModel(gtk.ListStore):
 			value = value_ + "\t(disable notification)"
 			res = False
 		self.set_value(cur_idx, 0, value)
-		row = self.curr_row(cur_idx)
-		dev_id = self.data_list[row].device_id()
+		dev_id = self.data_list[self.get_path(cur_idx)[0]].device_id()
+		print self.get_path(cur_idx)[0], 'get_path[0] == row', dev_id
 		return dev_id, res
-
-	def curr_row(self, curr_iter):
-		first_iter = self.get_iter_first()
-		row = -1
-		while first_iter is not None :
-			row += 1
-			if first_iter == curr_iter : break
-			first_iter = self.iter_next(first_iter)
-		return row
