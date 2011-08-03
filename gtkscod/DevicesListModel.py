@@ -54,7 +54,6 @@ class DevicesListModel(gtk.ListStore):
 			ret_devs.append(d.device_id())
 		curr_iter = self.get_iter_first()
 		while curr_iter is not None :
-			if curr_iter is None : return None, None
 			value_ = self.get_value(curr_iter, 0)
 			if value_.endswith("\t(disable notification)") :
 				value = value_[:-23]
@@ -75,5 +74,5 @@ class DevicesListModel(gtk.ListStore):
 			res = False
 		self.set_value(cur_idx, 0, value)
 		dev_id = self.data_list[self.get_path(cur_idx)[0]].device_id()
-		print self.get_path(cur_idx)[0], 'get_path[0] == row', dev_id
+		#print self.get_path(cur_idx)[0], 'get_path[0] == row', dev_id
 		return dev_id, res

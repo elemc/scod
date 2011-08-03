@@ -265,7 +265,7 @@ class WindowProcessing():
 	def _handle_enable_all(self, *args):
 		print args
 		devs = self.model.enable_all_devices()
-		#self.disen_device_notif(devs)
+		self.disen_device_notif(devs)
 
 	def _handle_disable_device(self, *args):
 		print args

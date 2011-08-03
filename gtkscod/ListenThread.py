@@ -56,9 +56,13 @@ class ListenThread():
 			print "Error in disableDeviceNotification"
 
 	def enable_device_notif(self, dev_id):
-		res = self.iface_cmd.enableDeviceNotification(dev_id)
-		if not res:
-			print "Error in enableDeviceNotification"
+		dest = []
+		if type(dev_id) in (str, unicode) :
+			dest.append(dev_id)
+		for devID in dest :
+			res = self.iface_cmd.enableDeviceNotification(devID)
+			if not res:
+				print "Error in enableDeviceNotification", devID
 
 	def new_device_handler(self, dev_id, dev_name, dev_type):
 		if self.mw is None:
