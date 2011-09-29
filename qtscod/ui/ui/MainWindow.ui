@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../../../img/gears.svg</normaloff>../../../img/gears.svg</iconset>
+    <normaloff>../img/gears.svg</normaloff>../img/gears.svg</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -202,7 +202,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../img/deleteaction.png</normaloff>../../../img/deleteaction.png</iconset>
+     <normaloff>../img/deleteaction.png</normaloff>../img/deleteaction.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Delete action</string>
@@ -214,7 +214,7 @@
   <action name="actionActionsClear">
    <property name="icon">
     <iconset>
-     <normaloff>../../../img/cancelactions.png</normaloff>../../../img/cancelactions.png</iconset>
+     <normaloff>../img/cancelactions.png</normaloff>../img/cancelactions.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Cancel actions</string>
@@ -229,7 +229,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../img/disable.png</normaloff>../../../img/disable.png</iconset>
+     <normaloff>../img/disable.png</normaloff>../img/disable.png</iconset>
    </property>
    <property name="text">
     <string>Disable &amp;notification</string>
@@ -241,7 +241,7 @@
   <action name="actionDevicesDisableAll">
    <property name="icon">
     <iconset>
-     <normaloff>../../../img/disableall.png</normaloff>../../../img/disableall.png</iconset>
+     <normaloff>../img/disableall.png</normaloff>../img/disableall.png</iconset>
    </property>
    <property name="text">
     <string>Disable notif for &amp;all</string>
@@ -269,7 +269,7 @@
   <action name="actionActionsApply">
    <property name="icon">
     <iconset>
-     <normaloff>../../../img/apply.png</normaloff>../../../img/apply.png</iconset>
+     <normaloff>../img/apply.png</normaloff>../img/apply.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Apply all actions</string>
