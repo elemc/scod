@@ -375,6 +375,7 @@ class PackageKitTransaction:
 			self.distro_upgrades.append(dupg)'''
 
 class PackageKit:
+<<<<<<< HEAD
 	def __init__(self, main_loop = None):
 		self.iface = None
 		self.bus   = None
@@ -401,6 +402,43 @@ class PackageKit:
 		trans  = PackageKitTransaction(tctrl, tid, self.dbus_loop)
 		
 		return trans
+=======
+    def __init__(self, main_loop = None):
+        self.iface = None
+        self.bus   = None
+        
+        #self.dbus_loop = None
+        self.dbus_loop = self._init_empty_loop(main_loop)
+            
+        self.bus = dbus.SystemBus() 
+        self.pk = self.bus.get_object('org.freedesktop.PackageKit', '/org/freedesktop/PackageKit', False)
+        self.iface = dbus.Interface(self.pk, 'org.freedesktop.PackageKit')
+
+    def getTransaction(self):
+        try:
+            tid = self.iface.GetTid()
+        except:
+            return None
+        
+        tiface = self.bus.get_object('org.freedesktop.PackageKit', tid, False)
+        tctrl  = dbus.Interface(tiface, 'org.freedesktop.PackageKit.Transaction')
+        trans = self._get_transaction_ptr(tctrl, tid, self.dbus_loop) 
+                #PackageKitTransaction(tctrl, tid, self.dbus_loop)
+        
+        return trans
+>>>>>>> 7f444a497c90ec547e61845441c539a4c1983444
+
+    def _get_transaction_ptr(self, tctrl, tid, dbus_loop):
+        trans = PackageKitTransaction(tctrl, tid, dbus_loop)
+        return trans
+
+    def _init_empty_loop(self, main_loop):
+        if main_loop is None:
+            import gobject
+            main_loop = gobject.MainLoop()
+            DBusGMainLoop(set_as_default = True)
+        return main_loop
+        
 
 def print_props(props):
 	print("=== begin ===")
