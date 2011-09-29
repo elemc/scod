@@ -2,14 +2,17 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4.QtCore import QSize,QString,Qt
-from PyQt4.QtGui import QMainWindow, QMessageBox, QDialogButtonBox, QCloseEvent
+from PyQt4.QtGui import QMainWindow, QMessageBox, QDialogButtonBox, QCloseEvent, QSystemTrayIcon, QIcon
 from ui.MainWindow import Ui_MainWindow
 
 from src.ListenThread import ListenThread
 from src.DevicesListModel import DevicesListModel
 from src.ActionsModel import ActionsModel
 
-from packagekitwrapper import PackageKitClient, PackageKitError 
+#from packagekitwrapper import PackageKitClient, PackageKitError 
+from PackageKitQt import PackageKitQt
+
+import qtscod_rc
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent = None):
@@ -20,11 +23,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._init_models()
         self.lt = ListenThread(self.add_new_device)
         self._install_akmods = False
-        self._main_pko = None #PackageKitClient()
+        self._main_pko = PackageKitQt()
         
         # right frame
         self.comboBoxModules.currentIndexChanged.connect(self._handle_select_module)
         self.buttonBoxDetails.clicked.connect(self._handle_rbb)
+
+        self.__debug_mode__ = True
+
+        self.trayIcon = QSystemTrayIcon(self)
+        self.trayIcon.setIcon(QIcon(":/img/gears"))
+        self.trayIcon.activated.connect(self._handle_tray_icon_activate)
+        self.hide()
 
     def closeEvent(self, event):
         event.ignore()
@@ -63,7 +73,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.model.dataChanged.connect(self._handle_data_changed_in_model)
     def _init_pk(self):
         if self._main_pko is None:
-            self._main_pko = PackageKitClient()
+            self._main_pko = PackageKitQt()
 
     def add_new_device(self, dev): 
         self.model.add_new_device(dev)
@@ -76,8 +86,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.lt.enable_device_notif(device_id)
 
     def show_notification(self):
-        if self.isHidden():
-            self.show()
+        #if self.isHidden():
+        #    self.show()
+        self.trayIcon.setVisible( True )
 
     def start_listen(self):
         self.lt.start()
@@ -135,15 +146,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def _do_resolve_packages(self, pkgs, to_remove = False):
         if len(pkgs) == 0:
-            return
+            return []
+        self.debug_print(pkgs)
         self._init_pk()
-        pkc = self._main_pko #PackageKitClient()
+        pkc = self._main_pko.getTransaction()
+        pkc.SetHints()
         filt = 'none'
         if to_remove:
             filt = 'installed'
-            pkg_ids = pkc.SearchNames(filt, pkgs)
+            pkc.SearchNames(filt, pkgs)
+            if pkc.has_error():
+                return []
+            pkg_ids = pkc.get_package_ids()
             return pkg_ids
-        pkg_ids = pkc.Resolve(filt, pkgs)
+        
+        pkc.Resolve(filt, pkgs)
+        if pkc.has_error():
+            return []
+        pkg_ids = pkc.get_package_ids()
 
         return pkg_ids
 
@@ -152,16 +172,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
         print "Begin install packages"
         self._init_pk()
-        pkc = self._main_pko #PackageKitClient()
-        pkc.InstallPackages(pkgs)
+        pkc = self._main_pko.getTransaction() #PackageKitClient()
+        pkc.SetHints()
+        pkc.InstallPackages(False, pkgs)
+        if pkc.has_error():
+            err_code, err_msg = pkc.error()
+            self.debug_print("Error: [%s] %s" % (err_code, err_msg))
 
     def _do_remove_packages(self, pkgs):
         if len(pkgs) == 0:
             return
         print "Begin remove packages"
         self._init_pk()
-        pkc = self._main_pko #PackageKitClient()
-        pkc.RemovePackages(pkgs)
+        pkc = self._main_pko.getTransaction()
+        pkc.RemovePackages(pkgs, True, True)
+        if pkc.has_error():
+            err_code, err_msg = pkc.error()
+            self.debug_print("Error: [%s] %s" % (err_code, err_msg))
 
     def _do_only_ids(self, pkgs):
         res_ids = []
@@ -179,19 +206,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
         elif len(pkg_ids) == 0:
             return
-        for pi_info,pi_id,pi_sum in pkg_ids:
-            print "+ %s (%s) installed: %s" % (pi_id, pi_sum, pi_info)
+        for pkg_id in pkg_ids:
+            self.debug_print("+ Installed: %s" % (pkg_id))
         
 
     def _do_act(self):
         pkgs_to_install, pkgs_to_remove = self.act_model.get_packages(self._install_akmods)
+        if len(pkgs_to_install) + len (pkgs_to_remove) == 0:
+            QMessageBox.information(self,
+                                    self.tr("Empty actions"),
+                                    self.tr("Nothing to install/remove"))
+            return
 
         # Resolve all packages
         pkg_ids_install = self._do_resolve_packages(pkgs_to_install)
         pkg_ids_remove = self._do_resolve_packages(pkgs_to_remove, True)
 
-        self._do_remove_packages(self._do_only_ids(pkg_ids_remove))
-        self._do_install_packages(self._do_only_ids(pkg_ids_install))
+        self.debug_print("To install: %s" % pkg_ids_install)
+        self.debug_print("To remove: %s" % pkg_ids_remove)
+
+        self._do_remove_packages(pkg_ids_remove)
+        self._do_install_packages(pkg_ids_install)
 
         print "Packages to install:"
         self._debug_print_pkg_ids(pkg_ids_install)
@@ -204,6 +239,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 				   QMessageBox.Yes and QMessageBox.No, QMessageBox.Yes)
         if res == QMessageBox.Yes:
             print 'rebooting'
+
+    def debug_print(self, msg):
+        if not self.__debug_mode__:
+            return
+        print(msg)
                        
     # slots
     def _handle_data_changed_in_model(self, begin_idx, end_idx):
@@ -227,6 +267,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def _handle_disable_all(self):
         devs = self.model.disable_all_devices()
         self.disen_device_notif(devs, True)
+        self.trayIcon.hide()
 
     def _handle_disable_device(self):
         cur_idx = self.listView.selectionModel().currentIndex()
@@ -295,3 +336,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setEnabled(False)
         self._do_act()
         self.setEnabled(True)
+
+    def _handle_tray_icon_activate(self, reason):
+        if self.isHidden():
+            self.show()
+        else:
+            self.hide()

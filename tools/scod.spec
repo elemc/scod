@@ -3,7 +3,7 @@
 %define gtkclient gtkscod
 
 Name:           scod
-Version:        0.1.git20110720
+Version:        0.1.git20110929
 Release:        1%{?dist}
 Summary:        SCOD is a applications for easy enable device kernel modules
 
@@ -13,7 +13,7 @@ URL:            www.russianfedora.ru
 Source0:        http://github.com/elemc/scod/%{name}-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildArch:	noarch
+#BuildArch:	noarch
 
 %description
 SCOD us a daemon and clients for easy operate with (a)kmod packages contained kernel modules
@@ -48,16 +48,12 @@ make %{?_smp_mflags}
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT/usr SYSCONFDIR=$RPM_BUILD_ROOT/etc UNITDIR=$RPM_BUILD_ROOT/%{_unitdir}
-cd qtscod
-make install DESTDIR=$RPM_BUILD_ROOT/usr
-cd ..
+pushd qtscod
+      make install DESTDIR=$RPM_BUILD_ROOT/usr
+popd
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-
-#%files
-#%defattr(-,root,root,-)
-#%doc README
 
 %files daemon
 %{_bindir}/%{daemon_name}
@@ -72,7 +68,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/%{qtclient}/*.py*
 %{_datadir}/%{qtclient}/src/*.py*
 %{_datadir}/%{qtclient}/ui/*.py*
-%{_datadir}/%{qtclient}/img/*
+%{_datadir}/%{qtclient}/lang/*
 %doc README
 
 %post daemon

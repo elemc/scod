@@ -6,6 +6,8 @@ from PyQt4.QtCore import Qt, QAbstractListModel, QModelIndex, QString
 from PyQt4.QtGui import QIcon, QBrush
 from src.Device import Device
 
+import qtscod_rc
+
 class DevicesListModel(QAbstractListModel):
     def __init__(self, parent = None):
         QAbstractListModel.__init__(self, parent)
@@ -14,8 +16,8 @@ class DevicesListModel(QAbstractListModel):
         self.update_model()
 
     def load_img(self):
-        self.wifi_icon = QIcon("../img/wifi.svg")
-        self.hard_icon = QIcon("../img/hardware.svg")
+        self.wifi_icon = QIcon(":/img/wifi")
+        self.hard_icon = QIcon(":/img/hardware")
         
     # Common methods
     def columnCount( self, parent = QModelIndex() ):

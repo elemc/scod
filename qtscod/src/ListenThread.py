@@ -10,11 +10,14 @@ import dbus
 
 class ListenThread(QThread):
     def __init__(self, parent_class):
+        print("Starting listen threads")
         QThread.__init__(self)
-        DBusQtMainLoop(set_as_default=True)
+        
+        self.main_loop = DBusQtMainLoop() #set_as_default=True)
+        DBusQtMainLoop(set_as_default = True)
 
         self.mw               = parent_class
-        bus                   = dbus.SystemBus()
+        bus                   = dbus.SystemBus(mainloop=self.main_loop)
         try:
             self.scod         = bus.get_object('ru.russianfedora.SCOD', '/ru/russianfedora/SCOD')
             self.iface_signal = dbus.Interface(self.scod, dbus_interface='ru.russianfedora.SCOD')
@@ -30,13 +33,15 @@ class ListenThread(QThread):
 
     def run(self):
         if (self.iface_signal is None) or (self.iface_cmd is None):
-            return
+            return False
         self.iface_signal.connect_to_signal('new_device', self.new_device_handler)
         self.iface_cmd.listDevices()
         QEventLoop().exec_()
+        #self.main_loop.exec_()
     
     def stop(self):
         QEventLoop().exit()
+        #self.main_loop.exit()
 
     def disable_device_notif(self, dev_id):
         dest = []
