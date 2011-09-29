@@ -10,7 +10,7 @@ from ListenThread import ListenThread
 from DevicesListModel import DevicesListModel
 from ActionsModel import ActionsModel
 
-from packagekitwrapper import PackageKitClient, PackageKitError 
+from PackageKit import PackageKit
 
 class WindowProcessing():
 	def __init__(self, parent = None):
@@ -18,7 +18,7 @@ class WindowProcessing():
 		self.Detail = Detail(False, 1)
 		self.lt = ListenThread(parent_class = self.add_new_device)
 		self._install_akmods = False
-		self._main_pko = None		#PackageKitClient()
+		self._main_pko = None		#PackageKit()
 		
 		# right frame
 		self.Detail.modules.connect('changed', self._handle_select_module)
@@ -52,7 +52,7 @@ class WindowProcessing():
 
 	def _init_pk(self):
 		if self._main_pko is None:
-			self._main_pko = PackageKitClient()
+			self._main_pko = PackageKit()
 
 	def add_new_device(self, dev):
 		print dev
@@ -159,15 +159,24 @@ class WindowProcessing():
 
 	def _do_resolve_packages(self, pkgs, to_remove = False):
 		if len(pkgs) == 0:
-			return
+			return []
+		self.debug_print(pkgs)
 		self._init_pk()
-		pkc = self._main_pko #PackageKitClient()
+		pkc = self._main_pko #PackageKit()
+		pkc = self._main_pko.getTransaction()
+		pkc.SetHints()
 		filt = 'none'
 		if to_remove:
 			filt = 'installed'
-			pkg_ids = pkc.SearchNames(filt, pkgs)
+			pkc.SearchNames(filt, pkgs)
+			if pkc.has_error():
+				return []
+			pkg_ids = pkc.get_package_ids()
 			return pkg_ids
-		pkg_ids = pkc.Resolve(filt, pkgs)
+		pkc.Resolve(filt, pkgs)
+		if pkc.has_error():
+			return []
+		pkg_ids = pkc.get_package_ids()
 
 		return pkg_ids
 
@@ -176,16 +185,26 @@ class WindowProcessing():
 			return
 		print "Begin install packages"
 		self._init_pk()
-		pkc = self._main_pko #PackageKitClient()
-		pkc.InstallPackages(pkgs)
+		pkc = self._main_pko #PackageKit()
+		pkc = self._main_pko.getTransaction()
+		pkc.SetHints()
+		pkc.InstallPackages(False, pkgs)
+		if pkc.has_error():
+			err_code, err_msg = pkc.error()
+			self.debug_print("Error: [%s] %s" % (err_code, err_msg))
 
 	def _do_remove_packages(self, pkgs):
 		if len(pkgs) == 0:
 			return
 		print "Begin remove packages"
 		self._init_pk()
-		pkc = self._main_pko #PackageKitClient()
-		pkc.RemovePackages(pkgs)
+		pkc = self._main_pko #PackageKit()
+		pkc = self._main_pko.getTransaction()
+		pkc.SetHints()
+		pkc.RemovePackages(pkgs, True, True)
+		if pkc.has_error():
+			err_code, err_msg = pkc.error()
+			self.debug_print("Error: [%s] %s" % (err_code, err_msg))
 
 	def _do_only_ids(self, pkgs):
 		res_ids = []
@@ -203,19 +222,33 @@ class WindowProcessing():
 			return
 		elif len(pkg_ids) == 0:
 			return
-		for pi_info,pi_id,pi_sum in pkg_ids:
-			print "+ %s (%s) installed: %s" % (pi_id, pi_sum, pi_info)
-		
+		for pkg_id in pkg_ids:
+			self.debug_print("+ Installed: %s" % (pkg_id))
 
 	def _do_act(self):
 		pkgs_to_install, pkgs_to_remove = self.act_model.get_packages(self._install_akmods)
+		if len(pkgs_to_install) + len(pkgs_to_remove) == 0:
+			dialog = gtk.Dialog(title = 'Empty action', \
+							parent = self.Parent.window, \
+							flags = gtk.DIALOG_MODAL, \
+							buttons = None)
+			label = gtk.Label('Nothing to install/remove')
+			dialog.vbox.pack_start(label, True, True, 0)
+			buttonOk = gtk.Button(stock = gtk.STOCK_OK)
+			dialog.action_area.pack_start(buttonOk, True, True, 0)
+			buttonOk.connect('clicked', self.result, True, dialog, '')
+			dialog.show_all()
+			return
 
 		# Resolve all packages
 		pkg_ids_install = self._do_resolve_packages(pkgs_to_install)
 		pkg_ids_remove = self._do_resolve_packages(pkgs_to_remove, True)
 
-		self._do_remove_packages(self._do_only_ids(pkg_ids_remove))
-		self._do_install_packages(self._do_only_ids(pkg_ids_install))
+		self.debug_print("To install: %s" % pkg_ids_install)
+		self.debug_print("To remove: %s" % pkg_ids_remove)
+
+		self._do_remove_packages(pkg_ids_remove)
+		self._do_install_packages(pkg_ids_install)
 
 		print "Packages to install:"
 		self._debug_print_pkg_ids(pkg_ids_install)
@@ -235,6 +268,11 @@ class WindowProcessing():
 		buttonOk.connect('clicked', self.result, True, dialog, 'reboot')
 		buttonNo.connect('clicked', self.result, False, dialog, 'reboot')
 		dialog.show_all()
+
+	def debug_print(self, msg):
+		if not self.__debug_mode__:
+			return
+		print(msg)
 
 	# slots
 	def _handle_data_changed_in_model(self, begin_idx, end_idx):
