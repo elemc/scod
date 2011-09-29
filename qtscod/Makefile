@@ -10,9 +10,13 @@ DATAROOTDIR = $(DESTDIR)/share/$(NAME)
 BINDIR      = $(DESTDIR)/bin
 PYUIC	    = /usr/bin/pyuic4
 MAKEUIPY    = $(PYUIC) -o
+PYRCC	    = /usr/bin/pyrcc4
+MAKERCC     = $(PYRCC) -o
+LRELEASE    = /usr/bin/lrelease-qt4
 
 # Code files
-CODE_FILES  = packagekitwrapper.py \
+CODE_FILES  = PackageKit.py \
+		PackageKitQt.py \
 		qtscod.py \
 		src/ActionsModel.py \
 		src/Device.py \
@@ -24,6 +28,8 @@ CODE_FILES  = packagekitwrapper.py \
 		ui/__init__.py
 
 UI_FILES    = ui/MainWindow
+RCC_FILES   = qtscod.qrc
+LOC_FILES   = lang/qtscod-ru_RU
 
 IMG_FILES   = img/apply.png \
 		img/cancelactions.png \
@@ -44,11 +50,11 @@ uninstall:
 	$(RM) $(DATAROOTDIR)
 	$(RM) $(BINDIR)/$(NAME)
 
-install: $(CODE_FILES) $(IMG_FILES)
+install: $(CODE_FILES) $(NAME)_rc.py $(LOC_FILES).qm
 	$(INSTALL) -m 755 ../tools/$(NAME).sh $(BINDIR)/$(NAME)
 
 mk-dataroot: 
-	$(MKDIR) $(DATAROOTDIR)/ui $(DATAROOTDIR)/src $(DATAROOTDIR)/img
+	$(MKDIR) $(DATAROOTDIR)/ui $(DATAROOTDIR)/src $(DATAROOTDIR)/lang
 	touch ui/__init__.py
 
 $(CODE_FILES): mk-dataroot $(UI_FILES).py
@@ -58,5 +64,10 @@ $(UI_FILES).py:
 	$(MAKEUIPY) $@ ui/$(UI_FILES).ui
 	$(INSTALL) -m 644 $@ $(DATAROOTDIR)/$@
 
-$(IMG_FILES): mk-dataroot
-	$(INSTALL) -m 644 ../$@ $(DATAROOTDIR)/$@
+$(NAME)_rc.py:
+	$(MAKERCC) $@ $(RCC_FILES)
+	$(INSTALL) -m 644 $@ $(DATAROOTDIR)/$@
+
+$(LOC_FILES).qm:
+	$(LRELEASE) $@.ts -qm $@.qm
+	$(INSTALL) -m 644 $@.qm $(DATAROOTDIR)/$@.qm
