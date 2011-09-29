@@ -13,7 +13,7 @@ URL:            www.russianfedora.ru
 Source0:        http://github.com/elemc/scod/%{name}-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildArch:	noarch
+#BuildArch:	noarch
 
 %description
 SCOD us a daemon and clients for easy operate with (a)kmod packages contained kernel modules

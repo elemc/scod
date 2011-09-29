@@ -68,6 +68,6 @@ $(NAME)_rc.py:
 	$(MAKERCC) $@ $(RCC_FILES)
 	$(INSTALL) -m 644 $@ $(DATAROOTDIR)/$@
 
-$(LOC_FILES).qm:
-	$(LRELEASE) $@.ts -qm $@.qm
-	$(INSTALL) -m 644 $@.qm $(DATAROOTDIR)/$@.qm
+$(LOC_FILES).qm: mk-dataroot
+	$(LRELEASE) $(LOC_FILES).ts -qm $@
+	$(INSTALL) -m 644 $@ $(DATAROOTDIR)/$@
