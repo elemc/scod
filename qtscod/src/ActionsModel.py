@@ -5,6 +5,8 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import Qt, QAbstractListModel, QModelIndex, QVariant, QString, pyqtSignal
 from PyQt4.QtGui import QIcon
 
+import qtscod_rc
+
 ''' Some action dict example
     act_dict['devid']= device_id            # sys_path for device
     act_dict['name'] = module_name          # 'nvidia' as example
@@ -20,7 +22,7 @@ class ActionsModel(QAbstractListModel):
         self.actions = [] # main data container
 
     def _load_imgs(self):
-        self.gears_icon = QIcon("../img/gears.svg")     
+        self.gears_icon = QIcon(":/img/gears")     
 
     def _view_name(self, act):
         act_type = self.tr('Installing')

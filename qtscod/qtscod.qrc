@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/img">
+        <file alias="apply">../img/apply.png</file>
+	<file alias="cancelactions">../img/cancelactions.png</file>
+	<file alias="deleteaction">../img/deleteaction.png</file>
+	<file alias="disable">../img/disable.png</file>
+	<file alias="disableall">../img/disableall.png</file>
+	<file alias="gears">../img/gears.svg</file>
+	<file alias="hardware">../img/hardware.svg</file>
+	<file alias="wifi">../img/wifi.svg</file>
+    </qresource>
+    <qresource prefix="/lang">
+        <file alias="qtscod-ru_RU.qm">lang/qtscod-ru_RU.qm</file>
+    </qresource>
+</RCC>

@@ -14,8 +14,8 @@
    <string>New devices</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>../img/gears.svg</normaloff>../img/gears.svg</iconset>
+   <iconset resource="../../qtscod.qrc">
+    <normaloff>:/img/gears</normaloff>:/img/gears</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -201,8 +201,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
-     <normaloff>../img/deleteaction.png</normaloff>../img/deleteaction.png</iconset>
+    <iconset resource="../../qtscod.qrc">
+     <normaloff>:/img/deleteaction</normaloff>:/img/deleteaction</iconset>
    </property>
    <property name="text">
     <string>&amp;Delete action</string>
@@ -213,8 +213,8 @@
   </action>
   <action name="actionActionsClear">
    <property name="icon">
-    <iconset>
-     <normaloff>../img/cancelactions.png</normaloff>../img/cancelactions.png</iconset>
+    <iconset resource="../../qtscod.qrc">
+     <normaloff>:/img/cancelactions</normaloff>:/img/cancelactions</iconset>
    </property>
    <property name="text">
     <string>&amp;Cancel actions</string>
@@ -228,8 +228,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
-     <normaloff>../img/disable.png</normaloff>../img/disable.png</iconset>
+    <iconset resource="../../qtscod.qrc">
+     <normaloff>:/img/disable</normaloff>:/img/disable</iconset>
    </property>
    <property name="text">
     <string>Disable &amp;notification</string>
@@ -240,8 +240,8 @@
   </action>
   <action name="actionDevicesDisableAll">
    <property name="icon">
-    <iconset>
-     <normaloff>../img/disableall.png</normaloff>../img/disableall.png</iconset>
+    <iconset resource="../../qtscod.qrc">
+     <normaloff>:/img/disableall</normaloff>:/img/disableall</iconset>
    </property>
    <property name="text">
     <string>Disable notif for &amp;all</string>
@@ -268,8 +268,8 @@
   </action>
   <action name="actionActionsApply">
    <property name="icon">
-    <iconset>
-     <normaloff>../img/apply.png</normaloff>../img/apply.png</iconset>
+    <iconset resource="../../qtscod.qrc">
+     <normaloff>:/img/apply</normaloff>:/img/apply</iconset>
    </property>
    <property name="text">
     <string>&amp;Apply all actions</string>
@@ -279,6 +279,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../qtscod.qrc"/>
+ </resources>
  <connections/>
 </ui>

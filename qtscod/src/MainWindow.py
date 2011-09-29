@@ -12,6 +12,8 @@ from src.ActionsModel import ActionsModel
 #from packagekitwrapper import PackageKitClient, PackageKitError 
 from PackageKitQt import PackageKitQt
 
+import qtscod_rc
+
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent = None):
         QMainWindow.__init__(self, parent)
@@ -30,7 +32,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.__debug_mode__ = True
 
         self.trayIcon = QSystemTrayIcon(self)
-        self.trayIcon.setIcon(QIcon("../img/gears.svg"))
+        self.trayIcon.setIcon(QIcon(":/img/gears"))
         self.trayIcon.activated.connect(self._handle_tray_icon_activate)
         self.hide()
 

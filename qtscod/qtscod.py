@@ -11,6 +11,7 @@ from src.MainWindow import MainWindow
 
 # sys
 import sys
+import qtscod_rc
 
 def get_lang_code(full_lang_name):
     llang = str(full_lang_name).split('_')
@@ -28,12 +29,20 @@ if __name__ == '__main__':
     
     trans_path = QLibraryInfo.location(QLibraryInfo.TranslationsPath)
     translator = QTranslator(app)
+    stranslator = QTranslator(app)
     lang = get_lang_code(locale.name())
     if lang is not None:
         trans_file = QString("qt_%s" % lang)
         #print trans_file
         translator.load(trans_file ,  trans_path)
         app.installTranslator(translator)
+
+        # self translate
+        strans_file = QString(":/lang/qtscod-%s" % QLocale.system().name())
+        print(strans_file)
+        stranslator.load(strans_file, "")
+        print (app.applicationFilePath())
+        app.installTranslator(stranslator)
 
     
     w = MainWindow()
